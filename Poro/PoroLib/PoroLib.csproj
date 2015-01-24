@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PoroLib</RootNamespace>
+    <AssemblyName>PoroLib</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AuthServer.cs" />
+    <Compile Include="Messages\ClientFacadeService\GetLoginDataPacketForUser.cs" />
+    <Compile Include="Messages\IMessage.cs" />
+    <Compile Include="Messages\InventoryService\GetSumonerActiveBoosts.cs" />
+    <Compile Include="Messages\LoginService\Login.cs" />
+    <Compile Include="Messages\MatchmakerService\GetAvailableQueues.cs" />
+    <Compile Include="Messages\MessageHandler.cs" />
+    <Compile Include="PoroServer.cs" />
+    <Compile Include="PoroServerSettings.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structures\Kudos\PendingKudosDTO.cs" />
+    <Compile Include="Structures\Platform\Account\AccountSummary.cs" />
+    <Compile Include="Structures\Platform\Catalog\RuneSlot.cs" />
+    <Compile Include="Structures\Platform\Catalog\RuneType.cs" />
+    <Compile Include="Structures\Platform\ClientFacade\LoginDataPacket.cs" />
+    <Compile Include="Structures\Platform\Client\ClientDynamicConfigurationNotification.cs" />
+    <Compile Include="Structures\Platform\Game\GameTypeConfigDTO.cs" />
+    <Compile Include="Structures\Platform\Login\AuthenticationCredentials.cs" />
+    <Compile Include="Structures\Platform\Login\Session.cs" />
+    <Compile Include="Structures\Platform\Matchmaking\GameQueueConfigcs.cs" />
+    <Compile Include="Structures\Platform\Matchmaking\MatchingThrottleConfig.cs" />
+    <Compile Include="Structures\Platform\Statistics\PlayerStatSummaries.cs" />
+    <Compile Include="Structures\Platform\Statistics\PlayerStatSummary.cs" />
+    <Compile Include="Structures\Platform\Statistics\SummaryAggStat.cs" />
+    <Compile Include="Structures\Platform\Statistics\SummaryAggStats.cs" />
+    <Compile Include="Structures\Platform\Summoner\AllSummonerData.cs" />
+    <Compile Include="Structures\Platform\Summoner\MasteryBookDTO.cs" />
+    <Compile Include="Structures\Platform\Summoner\MasteryPageDTO.cs" />
+    <Compile Include="Structures\Platform\Summoner\SlotEntry.cs" />
+    <Compile Include="Structures\Platform\Summoner\SpellBookDTO.cs" />
+    <Compile Include="Structures\Platform\Summoner\SpellBookPageDTO.cs" />
+    <Compile Include="Structures\Platform\Summoner\Summoner.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerActiveBoostsDTO.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerCatalog.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerDefaultSpells.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerLevel.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerLevelAndPoints.cs" />
+    <Compile Include="Structures\Platform\Summoner\SummonerTalentsAndPoints.cs" />
+    <Compile Include="Structures\Platform\Summoner\Talent.cs" />
+    <Compile Include="Structures\Platform\Summoner\TalentEntry.cs" />
+    <Compile Include="Structures\Platform\Summoner\TalentGroup.cs" />
+    <Compile Include="Structures\Platform\Summoner\TalentRow.cs" />
+    <Compile Include="Structures\Platform\SystemState\ClientSystemStatesNotification.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\rtmp-sharp\rtmp-sharp.csproj">
+      <Project>{aa1a4f5d-3bd4-4832-9f5d-90727007727e}</Project>
+      <Name>rtmp-sharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="localhost.p12">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
