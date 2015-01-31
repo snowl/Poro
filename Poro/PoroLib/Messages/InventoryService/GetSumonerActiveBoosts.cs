@@ -3,6 +3,7 @@ using RtmpSharp.Messaging;
 
 namespace PoroLib.Messages.InventoryService
 {
+    //Not a typo
     class GetSumonerActiveBoosts : IMessage
     {
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
@@ -10,7 +11,7 @@ namespace PoroLib.Messages.InventoryService
             SummonerActiveBoostsDTO activeBoosts = new SummonerActiveBoostsDTO
             {
                 IPBoostEndDate = 0.0,
-                XPBoostEndDate = 1399439504000.0,
+                XPBoostEndDate = 0.0,
                 IPBoostPerWinCount = 0,
                 IPLoyaltyBoost = 0,
                 SummonerID = 1,

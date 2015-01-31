@@ -1772,14 +1772,14 @@ namespace PoroLib.Messages.ClientFacadeService
                         InfTierMod = 1.0,
                         ExpToNextLevel = 90.0,
                         ExpForWin = 72.0,
-                        Level = 1.0
+                        Level = 999.0
                     },
                     SummonerLevelAndPoints = new SummonerLevelAndPoints
                     {
                         InfPoints = 0.0,
                         ExpPoints = 0.0,
                         SummonerId = 1.0,
-                        SummonerLevel = 1.0
+                        SummonerLevel = 999.0
                     }
                 },
                 CustomMinutesLeftToday = -1,

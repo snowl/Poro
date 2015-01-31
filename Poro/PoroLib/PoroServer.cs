@@ -1,13 +1,18 @@
-﻿using PoroLib.Structures;
+﻿using PoroLib.Forwarder;
+using PoroLib.Messages;
+using PoroLib.Redirector;
+using PoroLib.Structures;
 using RtmpSharp.IO;
 using RtmpSharp.Messaging;
 using RtmpSharp.Messaging.Messages;
 using RtmpSharp.Net;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace PoroLib
 {
@@ -17,6 +22,8 @@ namespace PoroLib
         private AuthServer _auth;
         private RtmpServer _server;
         private MessageHandler _handler;
+        private MessageForwarder _forwarder;
+        private PropertyRedirector _redirector;
 
         public PoroServer(PoroServerSettings settings)
         {
@@ -53,17 +60,30 @@ namespace PoroLib
             _handler.Register("MatchmakerService");
             _handler.Register("ClientFacadeService");
             _handler.Register("InventoryService");
+
+            //Set up the forwarder
+            _forwarder = new MessageForwarder(context);
+
+            //Set up the property redirector
+            _redirector = new PropertyRedirector(_settings);
         }
 
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
         {
             Console.WriteLine(string.Format("[LOG] Request for {0} at destination {1}", e.Operation, e.Destination));
-            e = _handler.Handle(sender, e);
+            var tempRecv = _handler.Handle(sender, e);
+
+            //if (tempRecv == null)
+            //    var tempRecv = _forwarder.Handle(sender, e);
+
+            //Task.WaitAll(tempRecv);
+
+            e = tempRecv;
         }
 
         public void Start()
         {
-            Console.WriteLine("[LOG] AuthServer listening on port 80");
+            Console.WriteLine("[LOG] AuthServer listening on port 8080");
             _auth.Start();
 
             Console.WriteLine("[LOG] RTMPS Server listening at rtmps://{0}:{1}", _settings.RTMPSHost, _settings.RTMPSPort);
@@ -84,7 +104,14 @@ namespace PoroLib
         public static string HandleAuth(HttpListenerRequest request)
         {
             //TODO: not have this data stored in code
-            return "{\"rate\":75,\"reason\":\"login_rate\",\"status\":\"LOGIN\",\"lqt\":{\"other\":\"\",\"fingerprint\":\"\",\"signature\":\"\",\"timestamp\":1418934199554,\"uuid\":\"\",\"resources\":\"lol\",\"account_id\":200006292,\"account_name\":\"snowl\"},\"delay\":10000,\"inGameCredentials\":{\"inGame\":false,\"summonerId\":null,\"serverIp\":null,\"serverPort\":null,\"encryptionKey\":null,\"handshakeToken\":null},\"user\":\"snowl\"}";
+            if (request.RawUrl.Contains("login-queue"))
+            {
+                return "{\"rate\":75,\"reason\":\"login_rate\",\"status\":\"LOGIN\",\"lqt\":{\"other\":\"\",\"fingerprint\":\"\",\"signature\":\"\",\"timestamp\":1418934199554,\"uuid\":\"\",\"resources\":\"lol\",\"account_id\":200006292,\"account_name\":\"snowl\"},\"delay\":10000,\"inGameCredentials\":{\"inGame\":false,\"summonerId\":null,\"serverIp\":null,\"serverPort\":null,\"encryptionKey\":null,\"handshakeToken\":null},\"user\":\"snowl\"}";
+            }
+            else
+            {
+                return File.ReadAllText("Landing/index.html");
+            }
         }
 
         void ClientCommandReceieved(object sender, CommandMessageReceivedEventArgs e)
@@ -102,6 +129,13 @@ namespace PoroLib
 
                 client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", clientConfig);
             }
+
+            /*var tempCommand = _forwarder.HandleCommand(sender, e);
+
+            Task.WaitAll(tempCommand);
+
+            RtmpClient client = sender as RtmpClient;
+            client.InvokeResult(e.InvokeId, e.Message.CorrelationId, tempCommand);*/
         }
     }
 }

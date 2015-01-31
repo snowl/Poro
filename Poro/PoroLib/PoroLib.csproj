@@ -44,8 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthServer.cs" />
+    <Compile Include="Forwarder\ForwardPlayer.cs" />
+    <Compile Include="Forwarder\MessageForwarder.cs" />
+    <Compile Include="Forwarder\Shards\BaseShard.cs" />
+    <Compile Include="Forwarder\Shards\NA.cs" />
+    <Compile Include="Forwarder\Shards\OCE.cs" />
     <Compile Include="Messages\ClientFacadeService\GetLoginDataPacketForUser.cs" />
     <Compile Include="Messages\IMessage.cs" />
+    <Compile Include="Messages\InventoryService\GetAvailableChampions.cs" />
     <Compile Include="Messages\InventoryService\GetSumonerActiveBoosts.cs" />
     <Compile Include="Messages\LoginService\Login.cs" />
     <Compile Include="Messages\MatchmakerService\GetAvailableQueues.cs" />
@@ -53,8 +59,13 @@
     <Compile Include="PoroServer.cs" />
     <Compile Include="PoroServerSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Redirector\Properties\PoroProperties.cs" />
+    <Compile Include="Redirector\PropertyRedirector.cs" />
     <Compile Include="Structures\Kudos\PendingKudosDTO.cs" />
     <Compile Include="Structures\Platform\Account\AccountSummary.cs" />
+    <Compile Include="Structures\Platform\Broadcast\BroadcastNotification.cs" />
+    <Compile Include="Structures\Platform\Catalog\ChampionDTO.cs" />
+    <Compile Include="Structures\Platform\Catalog\ChampionSkinDTO.cs" />
     <Compile Include="Structures\Platform\Catalog\RuneSlot.cs" />
     <Compile Include="Structures\Platform\Catalog\RuneType.cs" />
     <Compile Include="Structures\Platform\ClientFacade\LoginDataPacket.cs" />

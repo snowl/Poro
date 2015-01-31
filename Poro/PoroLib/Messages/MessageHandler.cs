@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PoroLib
+namespace PoroLib.Messages
 {
     public class MessageHandler
     {
@@ -41,7 +41,7 @@ namespace PoroLib
         public RemotingMessageReceivedEventArgs Handle(object sender, RemotingMessageReceivedEventArgs e)
         {
             if (!_messageHandlers.ContainsKey(e.Destination.ToLower()))
-                throw new Exception("Invalid destination");
+                return null;
 
             List<IMessage> handlers = _messageHandlers[e.Destination.ToLower()];
 
@@ -53,7 +53,7 @@ namespace PoroLib
                     return handler.HandleMessage(sender, e);
                 }
             }
-
+            
             return null;
         }
     }
