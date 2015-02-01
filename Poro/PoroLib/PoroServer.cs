@@ -60,6 +60,8 @@ namespace PoroLib
             _handler.Register("MatchmakerService");
             _handler.Register("ClientFacadeService");
             _handler.Register("InventoryService");
+            _handler.Register("SummonerRuneService");
+            _handler.Register("PlayerPreferencesService");
 
             //Set up the forwarder
             _forwarder = new MessageForwarder(context);
@@ -101,7 +103,7 @@ namespace PoroLib
             return cert.GetNameInfo(X509NameType.SimpleName, false);
         }
 
-        public static string HandleAuth(HttpListenerRequest request)
+        public static object HandleAuth(HttpListenerRequest request)
         {
             //TODO: not have this data stored in code
             if (request.RawUrl.Contains("login-queue"))
@@ -110,7 +112,22 @@ namespace PoroLib
             }
             else
             {
-                return File.ReadAllText("Landing/index.html");
+                string ReadURL = request.RawUrl;
+                if (ReadURL == "/")
+                    ReadURL = "/index.html";
+                if (ReadURL == "/favicon.ico")
+                    return "";
+
+                string ContentType = AuthServer.SetContentType(request.RawUrl);
+                string FileURL = string.Format("Landing{0}", ReadURL);
+                if (ContentType.StartsWith("image"))
+                {
+                    return File.ReadAllBytes(FileURL);
+                }
+                else
+                {
+                    return File.ReadAllText(FileURL);
+                }
             }
         }
 

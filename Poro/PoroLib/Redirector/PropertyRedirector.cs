@@ -49,8 +49,6 @@ namespace PoroLib.Redirector
             {
                 Console.WriteLine(string.Format("[LOG] LoLPatcher detected, server redirected to {0}", _settings.RTMPSHost));
 
-                _internalCounter = 0;
-
                 PoroProperties properties = new PoroProperties();
                 properties.host = _settings.RTMPSHost;
 
@@ -65,6 +63,8 @@ namespace PoroLib.Redirector
                 //Override property file
                 File.Delete(e.FullPath);
                 File.WriteAllLines(e.FullPath, modifiedProperties.ToArray());
+
+                _internalCounter = 0;
             }
         }
     }

@@ -35,7 +35,7 @@ namespace Poro
                 }
             }
 
-            return "";
+            throw new Exception("No connection has been found");
         }
     }
 }

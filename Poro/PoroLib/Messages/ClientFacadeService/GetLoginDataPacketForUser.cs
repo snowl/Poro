@@ -1754,14 +1754,14 @@ namespace PoroLib.Messages.ClientFacadeService
                         PreviousSeasonHighestTier = "UNRANKED",
                         ProfileIconId = 0,
                         AdvancedTutorialFlag = false,
-                        HelpFlag = true,
+                        HelpFlag = false,
                         LastGameDate = DateTime.Now,
                         RevisionDate = DateTime.Now,
                         Name = "Riot Snowl",
                         NameChangeFlag = false,
                         RevisionId = 0,
                         SumId = 1.0,
-                        TutorialFlag = false
+                        TutorialFlag = true
                     },
                     SummonerLevel = new SummonerLevel
                     {

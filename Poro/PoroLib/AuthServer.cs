@@ -8,9 +8,9 @@ namespace PoroLib
     class AuthServer
     {
         private readonly HttpListener _listener = new HttpListener();
-        private readonly Func<HttpListenerRequest, string> _responderMethod;
+        private readonly Func<HttpListenerRequest, object> _responderMethod;
 
-        public AuthServer(Func<HttpListenerRequest, string> method, params string[] prefixes)
+        public AuthServer(Func<HttpListenerRequest, object> method, params string[] prefixes)
         {
             if (prefixes == null || prefixes.Length == 0)
                 throw new ArgumentException("prefixes");
@@ -30,30 +30,40 @@ namespace PoroLib
 
             ThreadPool.QueueUserWorkItem((o) =>
             {
-                try
+                while (_listener.IsListening)
                 {
-                    while (_listener.IsListening)
+                    HttpListenerContext context = _listener.GetContext();
+                    context.Response.Headers[HttpResponseHeader.ContentType] = SetContentType(context.Request.RawUrl);
+
+                    object response = _responderMethod(context.Request);
+                    byte[] buf;
+
+                    if (response is string)
+                        buf = Encoding.UTF8.GetBytes((string)response);
+                    else
+                        buf = (byte[])response;
+
+                    context.Response.ContentLength64 = buf.Length;
+                    using (var Stream = context.Response.OutputStream)
                     {
-                        ThreadPool.QueueUserWorkItem((c) =>
-                        {
-                            var ctx = c as HttpListenerContext;
-                            try
-                            {
-                                string rstr = _responderMethod(ctx.Request);
-                                byte[] buf = Encoding.UTF8.GetBytes(rstr);
-                                ctx.Response.ContentLength64 = buf.Length;
-                                ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-                            }
-                            catch { }
-                            finally
-                            {
-                                ctx.Response.OutputStream.Close();
-                            }
-                        }, _listener.GetContext());
+                        Stream.Write(buf, 0, buf.Length);
                     }
                 }
-                catch { }
             });
+        }
+
+        public static string SetContentType(string RawUrl)
+        {
+            if (RawUrl.EndsWith(".png"))
+                return "image/png";
+            else if (RawUrl.EndsWith(".jpg"))
+                return "image/jpeg";
+            else if (RawUrl.EndsWith(".css"))
+                return "text/css";
+            else if (RawUrl.EndsWith(".js"))
+                return "text/javascript";
+
+            return "text/html";
         }
     }
 }
