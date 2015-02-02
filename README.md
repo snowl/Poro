@@ -5,6 +5,8 @@ A LoL RTMPS server emulator that will provide extra functionality to the League 
 
 ------------------------------------
 
-Currently using the Oceanic certificate - requires a modified connection file to connect to the local server via rtmps & login server. Only gets to the main menu (will time out then show two popups - decline these two messages to see the screen below.)
+Currently using the Oceanic certificate - connect via the oceanic server on patcher. Only gets to the main menu (will time out after a while).
 
-![Example](http://puu.sh/eWlob/cc28244666.jpg)
+Requires an index.html to run at app/web. This will be included later on once the web part of Poro is completed.
+
+![Example](http://puu.sh/fod8l/0231ba4bad.jpg)
