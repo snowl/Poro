@@ -1,7 +1,9 @@
-﻿using PoroLib.Forwarder;
+﻿using Newtonsoft.Json;
+using PoroLib.Forwarder;
 using PoroLib.Messages;
 using PoroLib.Redirector;
 using PoroLib.Structures;
+using PoroLib.Users;
 using RtmpSharp.IO;
 using RtmpSharp.Messaging;
 using RtmpSharp.Messaging.Messages;
@@ -24,13 +26,14 @@ namespace PoroLib
         private MessageHandler _handler;
         private MessageForwarder _forwarder;
         private PropertyRedirector _redirector;
+        private UserHandler _users;
 
         public PoroServer(PoroServerSettings settings)
         {
             _settings = settings;
 
-            //Create the Authentication Server to handle login requests
-            _auth = new AuthServer(HandleAuth, _settings.AuthLocations);
+            //Create the Authentication Server to handle login requests and client page
+            _auth = new AuthServer(HandleWebServ, _settings.AuthLocations);
 
             //Load the certificate for the RTMPS server
             var certificateStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
@@ -68,6 +71,9 @@ namespace PoroLib
 
             //Set up the property redirector
             _redirector = new PropertyRedirector(_settings);
+
+            //Set up the user server
+            _users = new UserHandler();
         }
 
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
@@ -103,7 +109,7 @@ namespace PoroLib
             return cert.GetNameInfo(X509NameType.SimpleName, false);
         }
 
-        public static object HandleAuth(HttpListenerRequest request)
+        public object HandleWebServ(HttpListenerRequest request)
         {
             //TODO: not have this data stored in code
             if (request.RawUrl.Contains("login-queue"))
@@ -119,10 +125,20 @@ namespace PoroLib
                     return "";
 
                 string ContentType = AuthServer.SetContentType(request.RawUrl);
-                string FileURL = string.Format("Landing{0}", ReadURL);
+                string FileURL = string.Format("app/web/{0}", ReadURL);
                 if (ContentType.StartsWith("image"))
                 {
                     return File.ReadAllBytes(FileURL);
+                }
+                else if (request.RawUrl.StartsWith("/api"))
+                {
+                    switch (request.RawUrl)
+                    {
+                        case "/api/users":
+                            return JsonConvert.SerializeObject(_users.GetUserList());
+                        default:
+                            return "404";
+                    }
                 }
                 else
                 {

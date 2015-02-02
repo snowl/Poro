@@ -36,6 +36,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -102,6 +103,8 @@
     <Compile Include="Structures\Platform\Summoner\TalentGroup.cs" />
     <Compile Include="Structures\Platform\Summoner\TalentRow.cs" />
     <Compile Include="Structures\Platform\SystemState\ClientSystemStatesNotification.cs" />
+    <Compile Include="Users\DPAPI.cs" />
+    <Compile Include="Users\UserHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\rtmp-sharp\rtmp-sharp.csproj">

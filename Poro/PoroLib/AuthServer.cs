@@ -62,8 +62,10 @@ namespace PoroLib
                 return "text/css";
             else if (RawUrl.EndsWith(".js"))
                 return "text/javascript";
+            else if (RawUrl.EndsWith("/"))
+                return "text/html";
 
-            return "text/html";
+            return "application/javascript";
         }
     }
 }
