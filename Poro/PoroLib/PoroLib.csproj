@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LiteDB">
+      <HintPath>..\packages\LiteDB.0.9.0\lib\net35\LiteDB.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -47,19 +50,25 @@
     <Compile Include="AuthServer.cs" />
     <Compile Include="Forwarder\ForwardPlayer.cs" />
     <Compile Include="Forwarder\MessageForwarder.cs" />
+    <Compile Include="Forwarder\NotConnectedException.cs" />
     <Compile Include="Forwarder\Shards\BaseShard.cs" />
     <Compile Include="Forwarder\Shards\NA.cs" />
     <Compile Include="Forwarder\Shards\OCE.cs" />
+    <Compile Include="Forwarder\Shards\Shards.cs" />
     <Compile Include="Messages\ClientFacadeService\GetLoginDataPacketForUser.cs" />
     <Compile Include="Messages\IMessage.cs" />
     <Compile Include="Messages\InventoryService\GetAvailableChampions.cs" />
     <Compile Include="Messages\InventoryService\GetSumonerActiveBoosts.cs" />
+    <Compile Include="Messages\LcdsGameInvitationService\CheckLobbyStatus.cs" />
+    <Compile Include="Messages\LcdsGameInvitationService\GetPendingInvitations.cs" />
     <Compile Include="Messages\LoginService\Login.cs" />
     <Compile Include="Messages\LoginService\Logout.cs" />
+    <Compile Include="Messages\MasteryBookService\GetMasteryBook.cs" />
     <Compile Include="Messages\MatchmakerService\GetAvailableQueues.cs" />
     <Compile Include="Messages\MessageHandler.cs" />
     <Compile Include="Messages\PlayerPreferencesService\LoadPreferencesByKey.cs" />
     <Compile Include="Messages\SummonerRuneService\GetSummonerRuneInventory.cs" />
+    <Compile Include="Messages\SummonerTeamService\CreatePlayer.cs" />
     <Compile Include="PoroServer.cs" />
     <Compile Include="PoroServerSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +83,7 @@
     <Compile Include="Structures\Platform\Catalog\RuneType.cs" />
     <Compile Include="Structures\Platform\ClientFacade\LoginDataPacket.cs" />
     <Compile Include="Structures\Platform\Client\ClientDynamicConfigurationNotification.cs" />
+    <Compile Include="Structures\Platform\Game\GameNotification.cs" />
     <Compile Include="Structures\Platform\Game\GameTypeConfigDTO.cs" />
     <Compile Include="Structures\Platform\Login\AuthenticationCredentials.cs" />
     <Compile Include="Structures\Platform\Login\Session.cs" />
@@ -117,6 +127,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="poro.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

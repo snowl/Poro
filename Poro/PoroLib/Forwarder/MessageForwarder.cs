@@ -10,11 +10,11 @@ namespace PoroLib.Forwarder
     {
         private ForwardPlayer _client;
         private SerializationContext _context;
+        public bool Forwarding { get { return _client != null; } }
 
         public MessageForwarder(SerializationContext context)
         {
             _context = context;
-            _client = new ForwardPlayer(new OCE(), context);
         }
 
         public void Assign(ForwardPlayer client)
@@ -24,6 +24,9 @@ namespace PoroLib.Forwarder
 
         public async Task<RemotingMessageReceivedEventArgs> Handle(object sender, RemotingMessageReceivedEventArgs e)
         {
+            if (_client == null)
+                throw new NotConnectedException();
+
             object result;
 
             object[] testConvert = e.OriginalMessage.Body as object[];
@@ -45,6 +48,9 @@ namespace PoroLib.Forwarder
 
         public async Task<object> HandleCommand(object sender, CommandMessageReceivedEventArgs e)
         {
+            if (_client == null)
+                throw new NotConnectedException();
+
             return await _client.ForwardCommand(sender, e);
         }
     }

@@ -10,6 +10,8 @@ namespace PoroLib.Messages.LoginService
             object[] body = e.Body as object[];
             AuthenticationCredentials creds = body[0] as AuthenticationCredentials;
 
+            PoroServer.ClientVersion = creds.ClientVersion;
+
             Session session = new Session
             {
                 Password = creds.Password,

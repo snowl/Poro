@@ -6,7 +6,7 @@
         private string _xmpp_server_url = "chat.oc1.lol.riotgames.com";
         private string _lq_uri = "http://localhost:8080";//"https://lq.oc1.lol.riotgames.com";
         private string _lobbyLandingURL = "http://localhost:8080";
-        private string _featuredGamesURL = "http://spectator.oc1.lol.riotgames.com:80/observer-mode/rest/featured";
+        private string _featuredGamesURL = "http://localhost:8080/observer-mode";//"http://spectator.oc1.lol.riotgames.com:80/observer-mode/rest/featured";
 
         //-------------------------------------------------------------------------------------
 

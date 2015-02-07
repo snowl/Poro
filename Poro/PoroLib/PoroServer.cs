@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using LiteDB;
+using Newtonsoft.Json;
 using PoroLib.Forwarder;
+using PoroLib.Forwarder.Shards;
 using PoroLib.Messages;
 using PoroLib.Redirector;
 using PoroLib.Structures;
@@ -9,18 +11,25 @@ using RtmpSharp.Messaging;
 using RtmpSharp.Messaging.Messages;
 using RtmpSharp.Net;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PoroLib
 {
     public class PoroServer
     {
+        private static string _clientVersion = "";
+        public static string ClientVersion { get { return _clientVersion; } set { _clientVersion = value; } }
+
         private PoroServerSettings _settings;
+        private SerializationContext _context;
         private AuthServer _auth;
         private RtmpServer _server;
         private MessageHandler _handler;
@@ -46,14 +55,14 @@ namespace PoroLib
             certificateStore.Close();
 
             //Generate the SerializationContext
-            var context = new SerializationContext();
+            _context = new SerializationContext();
             var structures = Assembly.GetExecutingAssembly().GetTypes().Where(x => String.Equals(x.Namespace, "PoroLib.Structures", StringComparison.Ordinal));
 
             foreach (Type ObjectType in structures)
-                context.Register(ObjectType);
+                _context.Register(ObjectType);
 
             //Create the RTMPS server with the context and certificate
-            _server = new RtmpServer(new IPEndPoint(IPAddress.Parse(_settings.RTMPSHost), _settings.RTMPSPort), context, _rtmpsCert);
+            _server = new RtmpServer(new IPEndPoint(IPAddress.Parse(_settings.RTMPSHost), _settings.RTMPSPort), _context, _rtmpsCert);
             _server.ClientCommandReceieved += ClientCommandReceieved;
             _server.ClientMessageReceived += ClientMessageReceived;
 
@@ -63,11 +72,14 @@ namespace PoroLib
             _handler.Register("MatchmakerService");
             _handler.Register("ClientFacadeService");
             _handler.Register("InventoryService");
+            _handler.Register("MasteryBookService");
             _handler.Register("SummonerRuneService");
             _handler.Register("PlayerPreferencesService");
+            _handler.Register("LcdsGameInvitationService");
+            _handler.Register("SummonerTeamService");
 
             //Set up the forwarder
-            _forwarder = new MessageForwarder(context);
+            _forwarder = new MessageForwarder(_context);
 
             //Set up the property redirector
             _redirector = new PropertyRedirector(_settings);
@@ -79,12 +91,23 @@ namespace PoroLib
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
         {
             Console.WriteLine(string.Format("[LOG] Request for {0} at destination {1}", e.Operation, e.Destination));
-            var tempRecv = _handler.Handle(sender, e);
 
-            //if (tempRecv == null)
-            //    var tempRecv = _forwarder.Handle(sender, e);
+            //Forward message to connected server
+            RemotingMessageReceivedEventArgs tempRecv = null;
+            if (_forwarder.Forwarding)
+            {
+                var handleTask = _forwarder.Handle(sender, e);
+                Task.WaitAll(handleTask);
+                tempRecv = handleTask.Result;
+            }
 
-            //Task.WaitAll(tempRecv);
+            //Handle locally
+            if (tempRecv == null)
+                tempRecv = _handler.Handle(sender, e);
+
+            //If no handling is possible, throw an exception
+            if (tempRecv == null)
+                throw new Exception(string.Format("Bad request for {0} at destination {1}", e.Operation, e.Destination));
 
             e = tempRecv;
         }
@@ -109,7 +132,7 @@ namespace PoroLib
             return cert.GetNameInfo(X509NameType.SimpleName, false);
         }
 
-        public object HandleWebServ(HttpListenerRequest request)
+        public async Task<object> HandleWebServ(HttpListenerRequest request)
         {
             //TODO: not have this data stored in code
             if (request.RawUrl.Contains("login-queue"))
@@ -118,6 +141,71 @@ namespace PoroLib
             }
             else
             {
+                #region API
+                if (request.RawUrl.StartsWith("/api"))
+                {
+                    //TODO: Create API handler
+                    if (request.RawUrl.StartsWith("/api/users"))
+                    {
+                        return JsonConvert.SerializeObject(_users.GetUserList());
+                    }
+                    else if (request.RawUrl.StartsWith("/api/register"))
+                    {
+                        if (request.QueryString == null && request.QueryString.Count != 4)
+                            return "400";
+
+                        _users.AddUser(new User
+                        {
+                            Username = request.QueryString["Username"],
+                            Password = request.QueryString["Password"],
+                            Region = request.QueryString["Region"],
+                            SummonerName = request.QueryString["Username"]
+                        });
+                        return JsonConvert.SerializeObject(_users.GetUserList());
+                    }
+                    else if (request.RawUrl.StartsWith("/api/delete"))
+                    {
+                        if (request.QueryString == null && request.QueryString.Count != 2)
+                            return "400";
+
+                        User u = _users.GetUser(request.QueryString["Username"], request.QueryString["Region"]);
+                        _users.RemoveUser(u);
+
+                        return JsonConvert.SerializeObject(_users.GetUserList());
+                    }
+                    else if (request.RawUrl.StartsWith("/api/regions"))
+                    {
+                        return JsonConvert.SerializeObject(Shards.GetStatus());
+                    }
+                    else if (request.RawUrl.StartsWith("/api/login"))
+                    {
+                        if (request.QueryString == null && request.QueryString.Count != 2)
+                            return "400";
+
+                        string Username = request.QueryString["Username"];
+                        string Region = request.QueryString["Region"];
+
+                        var ShardList = Shards.GetInstances<BaseShard>();
+                        BaseShard shard = null;
+                        foreach (BaseShard s in ShardList)
+                            if (s.Name == Region)
+                                shard = s;
+
+                        User user = _users.GetUser(Username, Region);
+                        ForwardPlayer player = new ForwardPlayer(user, shard, _context);
+                        bool Connected = await player.Connect(user, shard);
+
+                        _forwarder.Assign(player);
+
+                        return JsonConvert.SerializeObject("OK");
+                    }
+                    else
+                    {
+                        return "404";
+                    }
+                }
+                #endregion
+
                 string ReadURL = request.RawUrl;
                 if (ReadURL == "/")
                     ReadURL = "/index.html";
@@ -125,34 +213,66 @@ namespace PoroLib
                     return "";
 
                 string ContentType = AuthServer.SetContentType(request.RawUrl);
-                string FileURL = string.Format("app/web/{0}", ReadURL);
-                if (ContentType.StartsWith("image"))
+                string FileURL = string.Format("app/web{0}", ReadURL);
+
+                string RequestedFile = FileURL.Split('/').Last();
+                //Store current webpage in file
+                /*var x = File.OpenRead(FileURL);
+                using (var db = new LiteEngine("poro.dat"))
+                {
+                    var rte = db.FileStorage.All();
+                    db.FileStorage.Upload(RequestedFile, x);
+                }*/
+
+                using (var db = new LiteEngine("poro.dat"))
+                {
+                    var file = db.FileStorage.FindById(RequestedFile);
+
+                    if (file == null)
+                        return "404";
+
+                    var stream = file.OpenRead();
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        stream.CopyTo(memoryStream);
+                        byte[] bytes = memoryStream.ToArray();
+                        if (ContentType.StartsWith("image"))
+                        {
+                            return bytes;
+                        }
+                        else
+                        {
+                            return Encoding.Default.GetString(bytes);
+                        }
+                    }
+                }
+                
+                //Read direct from file system
+                /*if (ContentType.StartsWith("image"))
                 {
                     return File.ReadAllBytes(FileURL);
-                }
-                else if (request.RawUrl.StartsWith("/api"))
-                {
-                    switch (request.RawUrl)
-                    {
-                        case "/api/users":
-                            return JsonConvert.SerializeObject(_users.GetUserList());
-                        default:
-                            return "404";
-                    }
                 }
                 else
                 {
                     return File.ReadAllText(FileURL);
-                }
+                }*/
             }
+        }
+
+        public static List<T> GetInstances<T>()
+        {
+            return (from t in Assembly.GetExecutingAssembly().GetTypes()
+                    where t.BaseType == typeof(T) && t.GetConstructor(Type.EmptyTypes) != null
+                    select (T)Activator.CreateInstance(t)).ToList();
         }
 
         void ClientCommandReceieved(object sender, CommandMessageReceivedEventArgs e)
         {
+            RtmpClient client = sender as RtmpClient;
+
             if (e.Message.Operation == CommandOperation.Login)
             {
-                RtmpClient client = sender as RtmpClient;
-
                 ClientDynamicConfigurationNotification clientConfig = new ClientDynamicConfigurationNotification
                 {
                     Delta = false,

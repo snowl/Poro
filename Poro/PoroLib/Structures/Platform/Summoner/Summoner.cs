@@ -10,6 +10,8 @@ namespace PoroLib.Structures
     {
         [SerializedName("PreviousSeasonHighestTier")]
         public String PreviousSeasonHighestTier { get; set; }
+        [SerializedName("PreviousSeasonHighestTeamReward")]
+        public Int32 PreviousSeasonHighestTeamReward { get; set; }
         [SerializedName("internalName")]
         public String InternalName { get; set; }
         [SerializedName("acctId")]

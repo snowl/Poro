@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LiteDB;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +12,8 @@ namespace PoroLib.Users
 {
     public class UserHandler
     {
-        private Guid _uniqueGuid;
+        private string _uniqueGuid;
+        private string _location;
 
         public UserHandler()
         {
@@ -22,39 +24,49 @@ namespace PoroLib.Users
             using (MD5 md5 = MD5.Create())
             {
                 byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(MAC));
-                _uniqueGuid = new Guid(hash);
-
-                if (!File.Exists(Path.Combine("app", "user", _uniqueGuid.ToString())))
-                    File.Create(Path.Combine("app", "user", _uniqueGuid.ToString())).Dispose();
+                _uniqueGuid = new Guid(hash).ToString().Replace("-", "").Substring(0, 30);
             }
+
+            _location = Path.Combine("app", "user", "users");
+        }
+
+        private int GetIndex(IEnumerable<User> inumeration)
+        {
+            int Index = 1;
+            foreach(User u in inumeration)
+            {
+                if (u.Id >= Index)
+                {
+                    Index = u.Id + 1;
+                }
+            }
+            return Index;
         }
 
         public void AddUser(User Person)
         {
-            if (!File.Exists(Path.Combine("app", "user", _uniqueGuid.ToString())))
-                throw new Exception("Users database is missing.");
-
-            string Database = File.ReadAllText(Path.Combine("app", "user", _uniqueGuid.ToString()));
-            List<User> UserList = JsonConvert.DeserializeObject<List<User>>(Database);
-
-            if (UserList == null)
-                UserList = new List<User>();
-
-            foreach (User DatabaseUser in UserList)
+            using (var db = new LiteEngine(_location))
             {
-                if (DatabaseUser.Username == Person.Username
-                   && DatabaseUser.Region == Person.Region)
-                    return;
-            }
+                var col = db.GetCollection<User>(_uniqueGuid);
 
-            Person.Password = DPAPI.Encrypt(DPAPI.KeyType.UserKey,
+                var allUsers = col.All();
+                foreach (User u in allUsers)
+                {
+                    if (u.Username == Person.Username &&
+                        u.Region == Person.Region)
+                    {
+                        throw new Exception("User already exists!");
+                    }
+                }
+
+                Person.Id = GetIndex(col.All());
+                Person.Password = DPAPI.Encrypt(DPAPI.KeyType.UserKey,
                                               Person.Password,
                                               null, //Could possibly use as a password required to login
                                               "evidence.zip"); //just a random note if base64 is decoded
 
-            UserList.Add(Person);
-
-            File.WriteAllText(Path.Combine("app", "user", _uniqueGuid.ToString()), JsonConvert.SerializeObject(UserList));
+                col.Insert(Person);
+            }
         }
 
         /// <summary>
@@ -63,23 +75,20 @@ namespace PoroLib.Users
         /// <param name="Person">The user to remove.</param>
         public void RemoveUser(User Person)
         {
-            if (!File.Exists(Path.Combine("app", "user", _uniqueGuid.ToString())))
-                throw new Exception("Users database is missing.");
-
-            string Database = File.ReadAllText(Path.Combine("app", "user", _uniqueGuid.ToString()));
-            List<User> UserList = JsonConvert.DeserializeObject<List<User>>(Database);
-
-            if (UserList == null)
-                UserList = new List<User>();
-
-            foreach (User DatabaseUser in UserList.ToArray())
+            using (var db = new LiteEngine(_location))
             {
-                if (DatabaseUser.Username == Person.Username
-                   && DatabaseUser.Region == Person.Region)
-                    UserList.Remove(DatabaseUser);
-            }
+                var col = db.GetCollection<User>(_uniqueGuid);
 
-            File.WriteAllText(Path.Combine("app", "user", _uniqueGuid.ToString()), JsonConvert.SerializeObject(UserList));
+                var allUsers = col.All();
+                foreach (User u in allUsers)
+                {
+                    if (u.Username == Person.Username &&
+                        u.Region == Person.Region)
+                    {
+                        col.Delete(u.Id);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -90,20 +99,19 @@ namespace PoroLib.Users
         /// <returns>The requested user.</returns>
         public User GetUser(string Name, string Region)
         {
-            if (!File.Exists(Path.Combine("app", "user", _uniqueGuid.ToString())))
-                throw new Exception("Users database is missing.");
-
-            string Database = File.ReadAllText(Path.Combine("app", "user", _uniqueGuid.ToString()));
-            List<User> UserList = JsonConvert.DeserializeObject<List<User>>(Database);
-
-            if (UserList == null)
-                UserList = new List<User>();
-
-            foreach (User DatabaseUser in UserList)
+            using (var db = new LiteEngine(_location))
             {
-                if (DatabaseUser.Username == Name
-                   && DatabaseUser.Region == Region)
-                    return DatabaseUser;
+                var col = db.GetCollection<User>(_uniqueGuid);
+
+                var allUsers = col.All();
+                foreach (User u in allUsers)
+                {
+                    if (u.Username == Name &&
+                        u.Region == Region)
+                    {
+                        return u;
+                    }
+                }
             }
 
             return null;
@@ -115,20 +123,17 @@ namespace PoroLib.Users
         /// <returns>A list of users without passwords</returns>
         public List<User> GetUserList()
         {
-            if (!File.Exists(Path.Combine("app", "user", _uniqueGuid.ToString())))
-                throw new Exception("Users database is missing.");
+            using (var db = new LiteEngine(_location))
+            {
+                var col = db.GetCollection<User>(_uniqueGuid);
 
-            string Database = File.ReadAllText(Path.Combine("app", "user", _uniqueGuid.ToString()));
-            List<User> UserList = JsonConvert.DeserializeObject<List<User>>(Database);
-
-            if (UserList == null)
-                UserList = new List<User>();
-
-            //Don't leak any information we don't want to give out
-            foreach (User u in UserList)
-                u.Password = "";
-
-            return UserList;
+                var allUsers = col.All();
+                foreach (User u in allUsers)
+                {
+                    u.Password = "";
+                }
+                return allUsers.ToList();
+            }
         }
 
         /// <summary>
@@ -150,6 +155,7 @@ namespace PoroLib.Users
 
     public class User
     {
+        public int Id { get; set; }
         public string Username { get; set; }
         public string SummonerName { get; set; }
         public string Password { get; set; }

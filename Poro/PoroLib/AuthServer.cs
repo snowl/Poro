@@ -2,15 +2,16 @@
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PoroLib
 {
     class AuthServer
     {
         private readonly HttpListener _listener = new HttpListener();
-        private readonly Func<HttpListenerRequest, object> _responderMethod;
+        private readonly Func<HttpListenerRequest, Task<object>> _responderMethod;
 
-        public AuthServer(Func<HttpListenerRequest, object> method, params string[] prefixes)
+        public AuthServer(Func<HttpListenerRequest, Task<object>> method, params string[] prefixes)
         {
             if (prefixes == null || prefixes.Length == 0)
                 throw new ArgumentException("prefixes");
@@ -35,7 +36,9 @@ namespace PoroLib
                     HttpListenerContext context = _listener.GetContext();
                     context.Response.Headers[HttpResponseHeader.ContentType] = SetContentType(context.Request.RawUrl);
 
-                    object response = _responderMethod(context.Request);
+                    Task<object> responseTask = _responderMethod(context.Request);
+                    Task.WaitAll(responseTask);
+                    object response = responseTask.Result;
                     byte[] buf;
 
                     if (response is string)
@@ -62,7 +65,7 @@ namespace PoroLib
                 return "text/css";
             else if (RawUrl.EndsWith(".js"))
                 return "text/javascript";
-            else if (RawUrl.EndsWith("/"))
+            else if (RawUrl.EndsWith("/") || RawUrl.EndsWith(".html"))
                 return "text/html";
 
             return "application/javascript";

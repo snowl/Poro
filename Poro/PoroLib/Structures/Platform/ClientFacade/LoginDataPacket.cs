@@ -10,8 +10,12 @@ namespace PoroLib.Structures
     {
         [SerializedName("playerStatSummaries")]
         public PlayerStatSummaries PlayerStatSummaries { get; set; }
+        [SerializedName("showEmailVerificationPopup")]
+        public Boolean ShowEmailVerificationPopup { get; set; }
         [SerializedName("restrictedChatGamesRemaining")]
         public Int32 RestrictedChatGamesRemaining { get; set; }
+        [SerializedName("restrictedGamesRemainingForRanked")]
+        public Int32 RestrictedGamesRemainingForRanked { get; set; }
         [SerializedName("minutesUntilShutdown")]
         public Int32 MinutesUntilShutdown { get; set; }
         [SerializedName("minor")]
