@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Poro", "Poro.csproj", "{523089C7-160F-45E5-8E07-1EEFFE243623}"
 EndProject
@@ -12,19 +12,26 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug-FileSystem|Any CPU = Debug-FileSystem|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{523089C7-160F-45E5-8E07-1EEFFE243623}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{523089C7-160F-45E5-8E07-1EEFFE243623}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{523089C7-160F-45E5-8E07-1EEFFE243623}.Debug-FileSystem|Any CPU.ActiveCfg = Debug-FileSystem|Any CPU
+		{523089C7-160F-45E5-8E07-1EEFFE243623}.Debug-FileSystem|Any CPU.Build.0 = Debug-FileSystem|Any CPU
 		{523089C7-160F-45E5-8E07-1EEFFE243623}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{523089C7-160F-45E5-8E07-1EEFFE243623}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Debug-FileSystem|Any CPU.ActiveCfg = Debug-FileSystem|Any CPU
+		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Debug-FileSystem|Any CPU.Build.0 = Debug-FileSystem|Any CPU
 		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA1A4F5D-3BD4-4832-9F5D-90727007727E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Debug-FileSystem|Any CPU.ActiveCfg = Debug-FileSystem|Any CPU
+		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Debug-FileSystem|Any CPU.Build.0 = Debug-FileSystem|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

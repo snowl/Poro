@@ -17,7 +17,6 @@ namespace PoroLib.Certificate
         public static X509Certificate2 CreateSelfSignedCertificate(string subjectName)
         {
             byte[] sn = Guid.NewGuid().ToByteArray();
-            DateTime notAfter = new DateTime(643445675990000000);
             string subject = "CN=" + subjectName;
             RSA subjectKey = new RSACryptoServiceProvider(2048);
 
@@ -29,7 +28,7 @@ namespace PoroLib.Certificate
             cb.SerialNumber = sn;
             cb.IssuerName = subject;
             cb.NotBefore = DateTime.Now;
-            cb.NotAfter = notAfter;
+            cb.NotAfter = new DateTime(643445675990000000);
             cb.SubjectName = subject;
             cb.SubjectPublicKey = subjectKey;
             cb.Hash = "SHA1";

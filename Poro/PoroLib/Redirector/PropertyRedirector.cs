@@ -14,7 +14,7 @@ namespace PoroLib.Redirector
         public delegate void PatcherFoundHandler();
 
         private FileSystemWatcher _watcher;
-        private int _internalCounter;
+        private DateTime _lastWrite;
         private PoroServerSettings _settings;
 
         //
@@ -28,6 +28,8 @@ namespace PoroLib.Redirector
         public PropertyRedirector(PoroServerSettings settings)
         {
             _settings = settings;
+
+            _lastWrite = DateTime.MinValue;
 
             _watcher = new FileSystemWatcher();
             _watcher.Path = _settings.LeagueDrive;
@@ -45,10 +47,15 @@ namespace PoroLib.Redirector
             if (!e.FullPath.Contains("lol_air_client"))
                 return;
 
-            _watcher.EnableRaisingEvents = false;
+            var diffInSeconds = (DateTime.Now - _lastWrite).TotalSeconds;
+
+            //Only overwrite once every 5 seconds. This stops Poro from detecting itself and going into an infinite loop
+            if (diffInSeconds < 5)
+                return;
 
             Console.WriteLine(string.Format("[LOG] LoLPatcher detected, server redirected to {0}", _settings.RTMPSHost));
 
+            //Generate the properties according to the current client's IP address
             PoroProperties properties = new PoroProperties();
             properties.host = _settings.RTMPSHost;
 
@@ -64,6 +71,9 @@ namespace PoroLib.Redirector
             FileStream fileWait = WaitForFile(e.FullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
             fileWait.Close();
 
+            //Set the last write time of the properties to now
+            _lastWrite = DateTime.Now;
+
             //Override property file
             File.Delete(e.FullPath);
             File.WriteAllLines(e.FullPath, modifiedProperties.ToArray());
@@ -72,8 +82,6 @@ namespace PoroLib.Redirector
 
             if (PatcherFound != null)
                 PatcherFound();
-
-            _internalCounter = 0;
         }
 
         private FileStream WaitForFile(string fullPath, FileMode mode, FileAccess access, FileShare share)

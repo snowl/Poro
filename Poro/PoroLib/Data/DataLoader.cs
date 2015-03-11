@@ -16,6 +16,7 @@ namespace PoroLib.Data
 {
     public class DataLoader
     {
+        public bool _hasLoaded;
         public List<Champions> Champions;
         public List<ChampionSkins> ChampionSkins;
         public List<TalentGroup> TalentTree;
@@ -24,6 +25,11 @@ namespace PoroLib.Data
 
         public void LoadData()
         {
+            if (_hasLoaded)
+                return;
+
+            _hasLoaded = true;
+
             /*SQLiteConnection conn = new SQLiteConnection(Path.Combine(PoroServer.ClientLocation, "assets", "data", "gameStats", "gameStats_en_US.sqlite"));
 
             Champions = (from s in conn.Table<Champions>() orderby s.name select s).ToList();

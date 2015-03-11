@@ -107,6 +107,8 @@ namespace PoroLib
 
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
         {
+            bool wasForwarded = false;
+
             //Forward message to connected server
             RemotingMessageReceivedEventArgs tempRecv = null;
             if (_forwarder.Forwarding)
@@ -114,19 +116,29 @@ namespace PoroLib
                 var handleTask = _forwarder.Handle(sender, e);
                 Task.WaitAll(handleTask);
                 tempRecv = handleTask.Result;
+                wasForwarded = true;
             }
 
-            //Handle locally
+            //Handle locally if it wasn't forwarded
             if (tempRecv == null)
                 tempRecv = _handler.Handle(sender, e);
 
-            //If no handling is possible, throw an exception
-            if (tempRecv == null)
-                Console.WriteLine(string.Format("[LOG] Bad request for {0} at destination {1}", e.Operation, e.Destination));
-            else
-                Console.WriteLine(string.Format("[LOG] Request for {0} at destination {1}", e.Operation, e.Destination));
+            LogRequest(tempRecv, e, wasForwarded);
 
             e = tempRecv;
+        }
+
+        void LogRequest(RemotingMessageReceivedEventArgs tempRecv, RemotingMessageReceivedEventArgs e, bool wasForwarded)
+        {
+            string forwardMessage = " [Forwarded]";
+
+            if (!wasForwarded)
+                forwardMessage = "";
+
+            if (tempRecv == null)
+                Console.WriteLine(string.Format("[LOG] Bad request for {0} : {1}{2}", e.Operation, e.Destination, forwardMessage));
+            else
+                Console.WriteLine(string.Format("[LOG] Request for {0} : {1}{2}", e.Operation, e.Destination, forwardMessage));
         }
 
         public void Start()
@@ -230,21 +242,9 @@ namespace PoroLib
                     return "";
 
                 string ContentType = AuthServer.SetContentType(request.RawUrl);
-                string FileURL = string.Format("app/web{0}", ReadURL);
+                string RequestedFile = ReadURL.Split('/').Last();
 
-                string RequestedFile = FileURL.Split('/').Last();
-                //Uncomment and use access to filesystem to create poro.dat
-                /*var x = File.OpenRead(FileURL);
-                using (var db = new LiteEngine("poro.dat"))
-                {
-                    var file = db.FileStorage.FindById(RequestedFile);
-
-                    if (file == null)
-                    {
-                        db.FileStorage.Upload(RequestedFile, x);
-                    }
-                }*/
-
+#if !FILESYSTEM
                 using (var db = new LiteEngine("poro.dat"))
                 {
                     var file = db.FileStorage.FindById(RequestedFile);
@@ -268,16 +268,32 @@ namespace PoroLib
                         }
                     }
                 }
-                
-                //Read direct from file system
-                /*if (ContentType.StartsWith("image"))
+#endif
+      
+#if FILESYSTEM
+                //Uncomment to create poro.dat
+                /*var x = File.OpenRead(FileURL);
+                using (var db = new LiteEngine("poro.dat"))
+                {
+                    var file = db.FileStorage.FindById(RequestedFile);
+
+                    if (file == null)
+                    {
+                        db.FileStorage.Upload(RequestedFile, x);
+                    }
+                }*/
+
+                string FileURL = string.Format("app/web{0}", ReadURL);
+
+                if (ContentType.StartsWith("image"))
                 {
                     return File.ReadAllBytes(FileURL);
                 }
                 else
                 {
                     return File.ReadAllText(FileURL);
-                }*/
+                }
+#endif
             }
         }
 
