@@ -1,7 +1,10 @@
-﻿using PoroLib.Structures;
+﻿using PoroLib.Data.SQLite;
+using PoroLib.Structures;
 using RtmpSharp.Messaging;
-using System;
+using SQLite;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace PoroLib.Messages.InventoryService
 {
@@ -9,38 +12,29 @@ namespace PoroLib.Messages.InventoryService
     {
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
         {
-            List<ChampionDTO> champions = new List<ChampionDTO>
+            List<ChampionDTO> champions = new List<ChampionDTO>();
+
+            foreach (Champions champ in PoroServer._data.Champions)
             {
-                new ChampionDTO
+                var champDTO = new ChampionDTO
                 {
                     Owned = true,
-                    FreeToPlayReward = false,
-                    ChampionID = 1,
-                    FreeToPlay = false,
-                    EndDate = 0.0,
+                    ChampionID = champ.id,
                     Active = true,
                     BotEnabled = true,
-                    WinCountRemaining = 0,
-                    PurchaseDate = 0.0,
-                    RankedPlayEnabled = true,
-                    PurchaseDateTime = 0.0,
-                    ChampionSkins = new List<ChampionSkinDTO>
-                    {
-                        new ChampionSkinDTO
-                        {
-                            EndDate = 0.0,
-                            ChampionID = 1,
-                            FreeToPlayReward = false,
-                            SkinID = 1001,
-                            LastSelected = false,
-                            StillObtainable = false,
-                            Owned = false,
-                            PurchaseDate = 0.0,
-                            WinCountRemaining = 0
-                        }
-                    }
-                }
-            };
+                    RankedPlayEnabled = true
+                };
+
+                champDTO.ChampionSkins = PoroServer._data.ChampionSkins.Where(x => x.championId == champ.id).Select(skins => new ChampionSkinDTO
+                {
+                    ChampionID = champ.id,
+                    SkinID = skins.id,
+                    StillObtainable = true,
+                    Owned = true
+                }).ToList();
+
+                champions.Add(champDTO);
+            }
 
             e.ReturnRequired = true;
             e.Data = champions;

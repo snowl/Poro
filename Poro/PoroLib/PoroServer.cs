@@ -1,5 +1,7 @@
 ﻿using LiteDB;
 using Newtonsoft.Json;
+using PoroLib.Certificate;
+using PoroLib.Data;
 using PoroLib.Forwarder;
 using PoroLib.Forwarder.Shards;
 using PoroLib.Messages;
@@ -27,6 +29,10 @@ namespace PoroLib
     {
         private static string _clientVersion = "";
         public static string ClientVersion { get { return _clientVersion; } set { _clientVersion = value; } }
+        private static string _clientLocation = "";
+        public static string ClientLocation { get { return _clientLocation; } set { _clientLocation = value; } }
+
+        internal static DataLoader _data;
 
         private PoroServerSettings _settings;
         private SerializationContext _context;
@@ -44,14 +50,23 @@ namespace PoroLib
             //Create the Authentication Server to handle login requests and client page
             _auth = new AuthServer(HandleWebServ, _settings.AuthLocations);
 
-            //Load the certificate for the RTMPS server
+            //Load the certificate store for the RTMPS server
             var certificateStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
             certificateStore.Open(OpenFlags.MaxAllowed);
 
-            //Store the certificate if it's not in the local store
-            var _rtmpsCert = new X509Certificate2(_settings.CertFilename, "");
-            if (!StoreContainsCertificate(certificateStore.Certificates, _rtmpsCert))
-                certificateStore.Add(_rtmpsCert);
+            //Remove previous generated certificates
+            if (File.Exists("cert.p12"))
+                File.Delete("cert.p12");
+
+            //Remove previous certificate from the system
+            var CertificateList = (from X509Certificate2 cert in certificateStore.Certificates where cert.Issuer == "CN=" + _settings.RTMPSHost select cert).ToList();
+            foreach (var x in CertificateList)
+            {
+                certificateStore.Remove(x);
+            }
+
+            var _rtmpsCert = CertGen.CreateSelfSignedCertificate(_settings.RTMPSHost);
+            certificateStore.Add(_rtmpsCert);
             certificateStore.Close();
 
             //Generate the SerializationContext
@@ -84,14 +99,16 @@ namespace PoroLib
             //Set up the property redirector
             _redirector = new PropertyRedirector(_settings);
 
+            //Set up the data loader
+            _data = new DataLoader();
+            _redirector.PatcherFound += new PropertyRedirector.PatcherFoundHandler(_data.LoadData);
+
             //Set up the user server
             _users = new UserHandler();
         }
 
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
         {
-            Console.WriteLine(string.Format("[LOG] Request for {0} at destination {1}", e.Operation, e.Destination));
-
             //Forward message to connected server
             RemotingMessageReceivedEventArgs tempRecv = null;
             if (_forwarder.Forwarding)
@@ -107,7 +124,9 @@ namespace PoroLib
 
             //If no handling is possible, throw an exception
             if (tempRecv == null)
-                throw new Exception(string.Format("Bad request for {0} at destination {1}", e.Operation, e.Destination));
+                Console.WriteLine(string.Format("[LOG] Bad request for {0} at destination {1}", e.Operation, e.Destination));
+            else
+                Console.WriteLine(string.Format("[LOG] Request for {0} at destination {1}", e.Operation, e.Destination));
 
             e = tempRecv;
         }
@@ -216,12 +235,16 @@ namespace PoroLib
                 string FileURL = string.Format("app/web{0}", ReadURL);
 
                 string RequestedFile = FileURL.Split('/').Last();
-                //Store current webpage in file
+                //Uncomment and use access to filesystem to create poro.dat
                 /*var x = File.OpenRead(FileURL);
                 using (var db = new LiteEngine("poro.dat"))
                 {
-                    var rte = db.FileStorage.All();
-                    db.FileStorage.Upload(RequestedFile, x);
+                    var file = db.FileStorage.FindById(RequestedFile);
+
+                    if (file == null)
+                    {
+                        db.FileStorage.Upload(RequestedFile, x);
+                    }
                 }*/
 
                 using (var db = new LiteEngine("poro.dat"))
@@ -277,7 +300,7 @@ namespace PoroLib
                 {
                     Delta = false,
                     //TODO: not have this data stored in code
-                    Config = "{\"PlatformShutdown\":{\"Enabled\":false},\"BotConfigurations\":{\"IntermediateInCustoms\":true},\"ShareMatchHistory\":{\"MatchHistoryUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#login?redirect=%23player-search%2FcurrentAccount%2FOC1%2F{0}\",\"AdvancedGameDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"AdvancedGameDetailsEnabled\":true,\"MatchDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}\",\"ShareEndOfGameEnabled\":true,\"ShareGameUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"MatchHistoryEnabled\":true},\"GuestSlots\":{\"Enabled\":null},\"ServiceStatusAPI\":{\"Enabled\":true},\"GameTimerSync\":{\"Enabled\":false,\"PercentOfTotalTimerToSyncAt\":0.8},\"QueueRestriction\":{\"ServiceEnabled\":true,\"RankedDuoQueueRestrictionMode\":\"TIER\",\"KarmaEnabled\":false,\"RankedDuoQueueRestrictionMaxDelta\":1,\"RankedDuoQueueDefaultUnseededTier\":\"SILVER\"},\"DockedPrompt\":{\"EnabledNewDockedPromptRenderer\":true},\"QueueImages\":{\"OverrideQueueImage\":true},\"SuggestedPlayers\":{\"HonoredPlayersLimit\":4,\"FriendsOfFriendsLimit\":22,\"Enabled\":true,\"OnlineFriendsLimit\":4,\"PreviousPremadesLimit\":4,\"MaxNumSuggestedPlayers\":8,\"VictoriousComradesLimit\":4,\"FriendsOfFriendsEnabled\":true,\"MaxNumReplacements\":22},\"DisabledChampions\":{\"FIRSTBLOOD\":\"[]\",\"KINGPORO\":\"[161]\",\"ARAM_UNRANKED_5x5\":\"[]\",\"ONEFORALL_5x5\":\" []\",\"ASCENSION\":\"[83]\",\"SR_6x6\":\"[]\",\"URF\":\"[120,16,76,12,10,72,13,38,37]\",\"KING_PORO\":\"[161]\",\"ODIN_UNRANKED\":\"[]\",\"NIGHTMARE_BOT\":\"[]\",\"RANKED_SOLO_5x5\":\"[]\",\"TUTORIAL\":\"[]\",\"URF_BOT\":\"[]\",\"FIRSTBLOOD_2x2\":\"[]\",\"FIRSTBLOOD_1x1\":\"[]\",\"CLASSIC\":\"[]\",\"RANKED_TEAM_5x5\":\"[]\",\"RANKED_TEAM_3x3\":\"[]\",\"HEXAKILL\":\"[]\",\"BOT\":\"[]\",\"ODIN\":\"[]\",\"ONEFORALL\":\"[]\",\"NORMAL\":\"[]\",\"NORMAL_3x3\":\"[]\",\"BOT_3x3\":\"[]\",\"ARAM\":\"[]\"},\"Mutators\":{\"EnabledMutators\":\"[]\",\"EnabledModes\":\"[\\\"CLASSIC\\\",\\\"TUTORIAL\\\",\\\"ODIN\\\",\\\"ARAM\\\",\\\"KINGPORO\\\"]\"},\"EndOfGameGifting\":{\"Enabled\":true},\"SkinRentals\":{\"Enabled\":\"PROCESSONLY\"},\"ContextualEducation\":{\"TargetMinionsPerWave\":0.4,\"Enabled\":false,\"MaxTargetSummonerLevel\":10.0},\"DisabledChampionSkins\":{\"DisabledChampionSkins\":\"[]\"},\"EndOfGameGiftSettings\":{\"SenderGiftDailyMax\":5,\"GiftRecipientLevelMin\":5,\"GiftSenderRPMax\":50000,\"RecipientGiftDailyMax\":5,\"GiftSenderLevelMin\":15},\"Chat\":{\"Rename_general_group_throttle\":1.0,\"Default_public_chat_rooms\":\"\"},\"GameInvites\":{\"ServiceEnabled\":true,\"InviteBulkMaxSize\":200,\"LobbyCreationEnabled\":true},\"ContextualEducationURLs\":{\"LAST_HIT\":\"null\"},\"NewPlayerRouter\":{\"QueueID\":\"31\",\"ABDisablingOfTutorial\":true},\"SeasonReward\":{\"Maximum_team_reward_level\":3,\"Enabled\":true,\"ServiceCallEnabled\":true,\"QualificationWarningEnabled\":false,\"Minimum_points_per_reward_level\":\"20,45,75\",\"Minimum_win_team_reward_level_2\":35,\"Minimum_win_team_reward_level_1\":10,\"Minimum_win_team_reward_level_3\":75},\"String\":{\"String\":null},\"LeagueConfig\":{\"IsPreseason\":true,\"MasterTierEnabled\":true,\"PreseasonName\":\"2015\",\"SeasonName\":\"2014\"},\"ChampionTradeService\":{\"Enabled\":true},\"ChampionSelect\":{\"UseOptimizedChampSelectProcessor\":false,\"UseOptimizedSpellSelectProcessor\":false,\"AllChampsAvailableInAram\":false,\"UseOptimizedBotChampionSelectProcessor\":false,\"AutoReconnectEnabled\":false,\"CollatorChampionFilterEnabled\":false},\"FeaturedGame\":{\"MetadataEnabled\":\"OFF\"}}"
+                    Config = "{\"PlatformShutdown\":{\"Enabled\":false},\"BotConfigurations\":{\"IntermediateInCustoms\":true},\"ShareMatchHistory\":{\"MatchHistoryUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#login?redirect=%23player-search%2FcurrentAccount%2FOC1%2F{0}\",\"AdvancedGameDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"AdvancedGameDetailsEnabled\":true,\"MatchDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}\",\"ShareEndOfGameEnabled\":true,\"ShareGameUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"MatchHistoryEnabled\":true},\"GuestSlots\":{\"Enabled\":null},\"ServiceStatusAPI\":{\"Enabled\":true},\"GameTimerSync\":{\"Enabled\":false,\"PercentOfTotalTimerToSyncAt\":0.8},\"QueueRestriction\":{\"ServiceEnabled\":true,\"RankedDuoQueueRestrictionMode\":\"TIER\",\"KarmaEnabled\":false,\"RankedDuoQueueRestrictionMaxDelta\":1,\"RankedDuoQueueDefaultUnseededTier\":\"SILVER\"},\"DockedPrompt\":{\"EnabledNewDockedPromptRenderer\":true},\"QueueImages\":{\"OverrideQueueImage\":true},\"SuggestedPlayers\":{\"HonoredPlayersLimit\":4,\"FriendsOfFriendsLimit\":22,\"Enabled\":true,\"OnlineFriendsLimit\":4,\"PreviousPremadesLimit\":4,\"MaxNumSuggestedPlayers\":8,\"VictoriousComradesLimit\":4,\"FriendsOfFriendsEnabled\":true,\"MaxNumReplacements\":22},\"DisabledChampions\":{\"FIRSTBLOOD\":\"[]\",\"KINGPORO\":\"[161]\",\"ARAM_UNRANKED_5x5\":\"[]\",\"ONEFORALL_5x5\":\" []\",\"ASCENSION\":\"[83]\",\"SR_6x6\":\"[]\",\"URF\":\"[120,16,76,12,10,72,13,38,37]\",\"KING_PORO\":\"[161]\",\"ODIN_UNRANKED\":\"[]\",\"NIGHTMARE_BOT\":\"[]\",\"RANKED_SOLO_5x5\":\"[]\",\"TUTORIAL\":\"[]\",\"URF_BOT\":\"[]\",\"FIRSTBLOOD_2x2\":\"[]\",\"FIRSTBLOOD_1x1\":\"[]\",\"CLASSIC\":\"[]\",\"RANKED_TEAM_5x5\":\"[]\",\"RANKED_TEAM_3x3\":\"[]\",\"HEXAKILL\":\"[]\",\"BOT\":\"[]\",\"ODIN\":\"[]\",\"ONEFORALL\":\"[]\",\"NORMAL\":\"[]\",\"NORMAL_3x3\":\"[]\",\"BOT_3x3\":\"[]\",\"ARAM\":\"[]\"},\"Mutators\":{\"EnabledMutators\":\"[]\",\"EnabledModes\":\"[\\\"CLASSIC\\\",\\\"TUTORIAL\\\",\\\"ODIN\\\",\\\"ARAM\\\"]\"},\"EndOfGameGifting\":{\"Enabled\":true},\"SkinRentals\":{\"Enabled\":\"PROCESSONLY\"},\"ContextualEducation\":{\"TargetMinionsPerWave\":0.4,\"Enabled\":false,\"MaxTargetSummonerLevel\":10.0},\"DisabledChampionSkins\":{\"DisabledChampionSkins\":\"[]\"},\"EndOfGameGiftSettings\":{\"SenderGiftDailyMax\":5,\"GiftRecipientLevelMin\":5,\"GiftSenderRPMax\":50000,\"RecipientGiftDailyMax\":5,\"GiftSenderLevelMin\":15},\"Chat\":{\"Rename_general_group_throttle\":1.0,\"Default_public_chat_rooms\":\"\"},\"GameInvites\":{\"ServiceEnabled\":true,\"InviteBulkMaxSize\":200,\"LobbyCreationEnabled\":true},\"ContextualEducationURLs\":{\"LAST_HIT\":\"null\"},\"NewPlayerRouter\":{\"QueueID\":\"31\",\"ABDisablingOfTutorial\":true},\"SeasonReward\":{\"Maximum_team_reward_level\":3,\"Enabled\":true,\"ServiceCallEnabled\":true,\"QualificationWarningEnabled\":false,\"Minimum_points_per_reward_level\":\"20,45,75\",\"Minimum_win_team_reward_level_2\":35,\"Minimum_win_team_reward_level_1\":10,\"Minimum_win_team_reward_level_3\":75},\"String\":{\"String\":null},\"LeagueConfig\":{\"IsPreseason\":true,\"MasterTierEnabled\":true,\"PreseasonName\":\"2015\",\"SeasonName\":\"2014\"},\"ChampionTradeService\":{\"Enabled\":true},\"ChampionSelect\":{\"UseOptimizedChampSelectProcessor\":false,\"UseOptimizedSpellSelectProcessor\":false,\"AllChampsAvailableInAram\":false,\"UseOptimizedBotChampionSelectProcessor\":false,\"AutoReconnectEnabled\":false,\"CollatorChampionFilterEnabled\":false},\"FeaturedGame\":{\"MetadataEnabled\":\"OFF\"}}"
                 };
 
                 client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", clientConfig);

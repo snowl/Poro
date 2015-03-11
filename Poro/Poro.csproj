@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="poro.dat" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\rtmp-sharp\rtmp-sharp.csproj">
@@ -56,6 +57,11 @@
       <Project>{06c3ad01-a047-4ad1-90ae-e3c3259de61c}</Project>
       <Name>PoroLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="sqlite3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace PoroLib.Redirector
 {
     public class PropertyRedirector
     {
+        public event PatcherFoundHandler PatcherFound;
+        public delegate void PatcherFoundHandler();
+
         private FileSystemWatcher _watcher;
         private int _internalCounter;
         private PoroServerSettings _settings;
@@ -19,8 +23,6 @@ namespace PoroLib.Redirector
         // The patcher writes the lol.properties file on launch each time so by modifying it AFTER the patcher launches.
         // We can use our own custom lol.properties to connect to our RTMPS server without actually making the user go through
         // modifying it manually. The file gets rewritten on each launch so this modification is only temporary.
-        //
-        // Notes: The LoLPatcher does 3 writes to lol.properties. Just override the last one.
         //
 
         public PropertyRedirector(PoroServerSettings settings)
@@ -43,29 +45,57 @@ namespace PoroLib.Redirector
             if (!e.FullPath.Contains("lol_air_client"))
                 return;
 
-            _internalCounter += 1;
+            _watcher.EnableRaisingEvents = false;
 
-            if (_internalCounter == 3)
+            Console.WriteLine(string.Format("[LOG] LoLPatcher detected, server redirected to {0}", _settings.RTMPSHost));
+
+            PoroProperties properties = new PoroProperties();
+            properties.host = _settings.RTMPSHost;
+
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+            PropertyInfo[] members = typeof(PoroProperties).GetProperties(bindingFlags).ToArray();
+            List<string> modifiedProperties = new List<string>();
+            foreach (var x in members)
             {
-                Console.WriteLine(string.Format("[LOG] LoLPatcher detected, server redirected to {0}", _settings.RTMPSHost));
-
-                PoroProperties properties = new PoroProperties();
-                properties.host = _settings.RTMPSHost;
-
-                BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
-                PropertyInfo[] members = typeof(PoroProperties).GetProperties(bindingFlags).ToArray();
-                List<string> modifiedProperties = new List<string>();
-                foreach (var x in members)
-                {
-                    modifiedProperties.Add(string.Format("{0}={1}", x.Name, x.GetValue(properties)));
-                }
-
-                //Override property file
-                File.Delete(e.FullPath);
-                File.WriteAllLines(e.FullPath, modifiedProperties.ToArray());
-
-                _internalCounter = 0;
+                modifiedProperties.Add(string.Format("{0}={1}", x.Name, x.GetValue(properties)));
             }
+
+            //Wait for the file to be writeable
+            FileStream fileWait = WaitForFile(e.FullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            fileWait.Close();
+
+            //Override property file
+            File.Delete(e.FullPath);
+            File.WriteAllLines(e.FullPath, modifiedProperties.ToArray());
+
+            PoroServer.ClientLocation = e.FullPath.Replace("lol.properties", "");
+
+            if (PatcherFound != null)
+                PatcherFound();
+
+            _internalCounter = 0;
+        }
+
+        private FileStream WaitForFile(string fullPath, FileMode mode, FileAccess access, FileShare share)
+        {
+            for (int numTries = 0; numTries < 10; numTries++)
+            {
+                try
+                {
+                    FileStream fs = new FileStream(fullPath, mode, access, share);
+
+                    fs.ReadByte();
+                    fs.Seek(0, SeekOrigin.Begin);
+
+                    return fs;
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(50);
+                }
+            }
+
+            return null;
         }
     }
 }
