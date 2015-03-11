@@ -22,7 +22,7 @@ namespace PoroLib.Certificate
         {
             byte[] sn = Guid.NewGuid().ToByteArray();
             DateTime notBefore = DateTime.Now;
-            DateTime notAfter = new DateTime(643445675990000000); // 12/31/2039 23:59:59Z
+            DateTime notAfter = new DateTime(643445675990000000); //The future
             string subject = "CN=" + subjectName;
             string issuer = "CN=" + subjectName;
             RSA subjectKey = new RSACryptoServiceProvider(2048);
@@ -38,9 +38,6 @@ namespace PoroLib.Certificate
             // serial number MUST be positive
             if ((sn[0] & 0x80) == 0x80)
                 sn[0] -= 0x80;
-
-            if (subject == null)
-                throw new Exception("Missing Subject Name");
 
             X509CertificateBuilder cb = new X509CertificateBuilder(3);
             cb.SerialNumber = sn;
@@ -64,8 +61,6 @@ namespace PoroLib.Certificate
 
             byte[] rawcert = cb.Sign(issuerKey);
 
-
-
             PKCS12 p12 = new PKCS12();
             p12.Password = "";
 
@@ -80,11 +75,7 @@ namespace PoroLib.Certificate
             p12.AddPkcs8ShroudedKeyBag(subjectKey, attributes);
             p12.SaveToFile("cert.p12");
 
-            var x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2("cert.p12", "", System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.Exportable);
-
-
-
-            return x509;
+            return new X509Certificate2("cert.p12", "", X509KeyStorageFlags.Exportable);
         }
     }
 }

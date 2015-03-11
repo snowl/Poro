@@ -56,15 +56,13 @@ namespace PoroLib
 
             //Remove previous generated certificates
             if (File.Exists("cert.p12"))
-                File.Delete("cert.p12");
-
-            //Remove previous certificate from the system
-            var CertificateList = (from X509Certificate2 cert in certificateStore.Certificates where cert.Issuer == "CN=" + _settings.RTMPSHost select cert).ToList();
-            foreach (var x in CertificateList)
             {
-                certificateStore.Remove(x);
+                var oldCert = new X509Certificate2("cert.p12", "", X509KeyStorageFlags.Exportable);
+                certificateStore.Remove(oldCert);
+                File.Delete("cert.p12");
             }
 
+            //Generate new certificate for this run and add it to the store.
             var _rtmpsCert = CertGen.CreateSelfSignedCertificate(_settings.RTMPSHost);
             certificateStore.Add(_rtmpsCert);
             certificateStore.Close();
