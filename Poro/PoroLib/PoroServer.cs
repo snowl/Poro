@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LiteDB;
+using Newtonsoft.Json;
 using PoroLib.Certificate;
 using PoroLib.Data;
 using PoroLib.Forwarder;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PoroLib
@@ -276,6 +278,8 @@ namespace PoroLib
                 bool Connected = await player.Connect(user, shard);
             
                 _forwarder.Assign(player);
+
+                Console.WriteLine(string.Format("[LOG] Forwarding to {0} ({1})", Username, Region));
             
                 return JsonConvert.SerializeObject("OK");
             }
@@ -283,13 +287,6 @@ namespace PoroLib
             {
                 return "404";
             }
-        }
-
-        public static List<T> GetInstances<T>()
-        {
-            return (from t in Assembly.GetExecutingAssembly().GetTypes()
-                    where t.BaseType == typeof(T) && t.GetConstructor(Type.EmptyTypes) != null
-                    select (T)Activator.CreateInstance(t)).ToList();
         }
 
         void ClientCommandReceieved(object sender, CommandMessageReceivedEventArgs e)
@@ -307,6 +304,13 @@ namespace PoroLib
 
                 client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", clientConfig);
             }
+        }
+
+        public static List<T> GetInstances<T>()
+        {
+            return (from t in Assembly.GetExecutingAssembly().GetTypes()
+                    where t.BaseType == typeof(T) && t.GetConstructor(Type.EmptyTypes) != null
+                    select (T)Activator.CreateInstance(t)).ToList();
         }
     }
 }

@@ -458,14 +458,14 @@ namespace PoroLib.Messages.ClientFacadeService
                 {
                     SpellBook = new SpellBookDTO
                     {
-                        SummonerId = 1.0,
+                        SummonerId = int.MaxValue - 1,
                         DateString = "Wed Jul 17 23:05:42 PDT 2013",
                         BookPages = new List<SpellBookPageDTO>
                                 {
                                     new SpellBookPageDTO
                                     {
                                         Current = true,
-                                        SummonerId = 1.0,
+                                        SummonerId = int.MaxValue - 1,
                                         PageId = 2.0,
                                         CreateDate = DateTime.Now,
                                         Name = "Rune Page 1",
@@ -474,7 +474,7 @@ namespace PoroLib.Messages.ClientFacadeService
                                     new SpellBookPageDTO
                                     {
                                         Current = true,
-                                        SummonerId = 1.0,
+                                        SummonerId = int.MaxValue - 1,
                                         PageId = 3.0,
                                         CreateDate = DateTime.Now,
                                         Name = "Rune Page 2",
@@ -484,13 +484,13 @@ namespace PoroLib.Messages.ClientFacadeService
                     },
                     SummonerDefaultSpells = new SummonerDefaultSpells //TODO
                     {
-                        SummonerId = 1.0,
+                        SummonerId = int.MaxValue - 1,
                         SummonerDefaultSpellMap = new AsObject()
                     },
                     SummonerTalentsAndPoints = new SummonerTalentsAndPoints
                     {
                         CreateDate = DateTime.Now,
-                        SummonerId = 1.0,
+                        SummonerId = int.MaxValue - 1,
                         TalentPoints = 1,
                         ModifyDate = DateTime.Now,
                     },
@@ -498,7 +498,7 @@ namespace PoroLib.Messages.ClientFacadeService
                     {
                         InternalName = "Poro User",
                         DisplayEloQuestionaire = false,
-                        AcctId = 1.0,
+                        AcctId = int.MaxValue - 2,
                         PreviousSeasonHighestTier = "UNRANKED",
                         PreviousSeasonHighestTeamReward = 0,
                         ProfileIconId = 0,
@@ -509,19 +509,19 @@ namespace PoroLib.Messages.ClientFacadeService
                         Name = "Poro User",
                         NameChangeFlag = false,
                         RevisionId = 0,
-                        SumId = 1.0,
+                        SumId = int.MaxValue - 1,
                         TutorialFlag = true
                     },
                     MasteryBook = new MasteryBookDTO
                     {
-                        SummonerId = 1.0,
+                        SummonerId = int.MaxValue - 1,
                         DateString = "Wed Apr 23 00:33:57 PDT 2014",
                         BookPages = new List<MasteryBookPageDTO>
                                 {
                                     new MasteryBookPageDTO
                                     {
                                         Current = true,
-                                        SummonerId = 1.0,
+                                        SummonerId = int.MaxValue - 1,
                                         PageId = 1.0,
                                         Name = "Mastery Page 1",
                                         TalentEntries = new List<TalentEntry>()
@@ -543,7 +543,7 @@ namespace PoroLib.Messages.ClientFacadeService
                     {
                         InfPoints = 0.0,
                         ExpPoints = 0.0,
-                        SummonerId = 1.0,
+                        SummonerId = int.MaxValue - 1,
                         SummonerLevel = 999.0
                     }
                 },

@@ -14,7 +14,7 @@ namespace PoroLib.Messages.InventoryService
                 XPBoostEndDate = 0.0,
                 IPBoostPerWinCount = 0,
                 IPLoyaltyBoost = 0,
-                SummonerID = 1,
+                SummonerID = int.MaxValue - 1,
                 XPBoostPerWinCount = 0,
                 XPLoyaltyBoost = 0
             };

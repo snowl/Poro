@@ -11,7 +11,7 @@ namespace PoroLib.Messages.SummonerRuneService
             SummonerRuneInventory inventory = new SummonerRuneInventory
             {
                 DateString = "Thu Jun 27 20:58:33 PDT 2013",
-                SummonerId = 1.0,
+                SummonerId = int.MaxValue - 1,
                 SummonerRunes = new List<SummonerRune>()
             };
 

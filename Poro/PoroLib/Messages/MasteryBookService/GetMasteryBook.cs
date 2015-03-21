@@ -10,14 +10,14 @@ namespace PoroLib.Messages.MasteryBookService
         {
             MasteryBookDTO MasteryBook = new MasteryBookDTO
             {
-                SummonerId = 1.0,
+                SummonerId = int.MaxValue - 1,
                 DateString = "Wed Apr 23 00:33:57 PDT 2014",
                 BookPages = new List<MasteryBookPageDTO>
                         {
                             new MasteryBookPageDTO
                             {
                                 Current = true,
-                                SummonerId = 1.0,
+                                SummonerId = int.MaxValue - 1,
                                 PageId = 1.0,
                                 Name = "Mastery Page 1",
                                 TalentEntries = new List<TalentEntry>()

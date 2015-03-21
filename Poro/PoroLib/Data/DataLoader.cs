@@ -30,13 +30,13 @@ namespace PoroLib.Data
 
             _hasLoaded = true;
 
-            /*SQLiteConnection conn = new SQLiteConnection(Path.Combine(PoroServer.ClientLocation, "assets", "data", "gameStats", "gameStats_en_US.sqlite"));
+            SQLiteConnection conn = new SQLiteConnection(Path.Combine(PoroServer.ClientLocation, "assets", "data", "gameStats", "gameStats_en_US.sqlite"));
 
             Champions = (from s in conn.Table<Champions>() orderby s.name select s).ToList();
 
             ChampionSkins = (from s in conn.Table<ChampionSkins>() select s).ToList();
 
-            conn.Close();*/
+            conn.Close();
 
             using (WebClient client = new WebClient())
             {
@@ -65,10 +65,48 @@ namespace PoroLib.Data
 
                     for (int i = 0; i < mastery.Value.Count; i++ )
                     {
+                        List<Talent> talentList = new List<Talent>();
+                        List<MasteryLite> masteryList = mastery.Value[i];
+                        for (int j = 0; j < masteryList.Count; j++ )
+                        {
+                            if (masteryList[j] == null)
+                                continue;
+
+                            var data = mData.data[Convert.ToInt32(masteryList[j].masteryId)];
+                            Talent t = new Talent
+                            {
+                                Index = j,
+                                Name = data.name,
+                                Level1Desc = data.name,
+                                Level2Desc = data.name,
+                                Level3Desc = data.name,
+                                Level4Desc = data.name,
+                                Level5Desc = data.name,
+                                GameCode = data.id,
+                                TltId = data.id,
+                                MaxRank = data.ranks,
+                                MinLevel = 1,
+                                MinTier = 1,
+                                TalentGroupId = group.TltGroupId,
+                                TalentRowId = (i + 1) * group.TltGroupId
+                            };
+
+                            if (data.preReq != "0")
+                                t.PrereqTalentGameCode = Convert.ToInt32(data.preReq);
+
+                            talentList.Add(t);
+                        }
+
                         TalentRow row = new TalentRow
                         {
-                            Index = i
+                            Index = i,
+                            Talents = talentList,
+                            PointsToActivate = i * 4,
+                            TltRowId = (i + 1) * group.TltGroupId,
+                            TltGroupId = group.TltGroupId
                         };
+
+                        group.TalentRows.Add(row);
                     }
 
                     TalentTree.Add(group);
