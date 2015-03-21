@@ -6,6 +6,5 @@
         public int RTMPSPort = 2099;
         public string LeagueDrive = "C:/";
         public string[] AuthLocations = new string[] { "http://localhost:8080/" };
-        public string CertFilename = "localhost.p12";
     }
 }

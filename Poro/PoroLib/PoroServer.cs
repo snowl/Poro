@@ -1,5 +1,4 @@
-﻿using LiteDB;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PoroLib.Certificate;
 using PoroLib.Data;
 using PoroLib.Forwarder;
@@ -19,8 +18,6 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PoroLib
@@ -54,12 +51,13 @@ namespace PoroLib
             var certificateStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
             certificateStore.Open(OpenFlags.MaxAllowed);
 
-            //Remove previous generated certificates
-            if (File.Exists("cert.p12"))
+            //Remove last certificate in case it wasn't deleted on close
+            foreach (var cert in certificateStore.Certificates)
             {
-                var oldCert = new X509Certificate2("cert.p12", "", X509KeyStorageFlags.Exportable);
-                certificateStore.Remove(oldCert);
-                File.Delete("cert.p12");
+                if (cert.IssuerName.Name == string.Format("CN={0}", _settings.RTMPSHost))
+                {
+                    certificateStore.Remove(cert);
+                }
             }
 
             //Generate new certificate for this run and add it to the store.
@@ -150,90 +148,18 @@ namespace PoroLib
             _server.Listen();
         }
 
-        bool StoreContainsCertificate(X509Certificate2Collection collection, X509Certificate2 certificate)
-        {
-            var CertificateList = (from X509Certificate2 cert in collection select GetCommonName(cert)).ToList();
-            return CertificateList.Contains(GetCommonName(certificate));
-        }
-
-        string GetCommonName(X509Certificate2 cert)
-        {
-            return cert.GetNameInfo(X509NameType.SimpleName, false);
-        }
-
         public async Task<object> HandleWebServ(HttpListenerRequest request)
         {
-            //TODO: not have this data stored in code
             if (request.RawUrl.Contains("login-queue"))
             {
-                return "{\"rate\":75,\"reason\":\"login_rate\",\"status\":\"LOGIN\",\"lqt\":{\"other\":\"\",\"fingerprint\":\"\",\"signature\":\"\",\"timestamp\":1418934199554,\"uuid\":\"\",\"resources\":\"lol\",\"account_id\":200006292,\"account_name\":\"snowl\"},\"delay\":10000,\"inGameCredentials\":{\"inGame\":false,\"summonerId\":null,\"serverIp\":null,\"serverPort\":null,\"encryptionKey\":null,\"handshakeToken\":null},\"user\":\"snowl\"}";
+                return "{\"status\":\"LOGIN\"}";
+            }
+            else if (request.RawUrl.StartsWith("/api"))
+            {
+                return await HandleAPI(request);
             }
             else
             {
-                #region API
-                if (request.RawUrl.StartsWith("/api"))
-                {
-                    //TODO: Create API handler
-                    if (request.RawUrl.StartsWith("/api/users"))
-                    {
-                        return JsonConvert.SerializeObject(_users.GetUserList());
-                    }
-                    else if (request.RawUrl.StartsWith("/api/register"))
-                    {
-                        if (request.QueryString == null && request.QueryString.Count != 4)
-                            return "400";
-
-                        _users.AddUser(new User
-                        {
-                            Username = request.QueryString["Username"],
-                            Password = request.QueryString["Password"],
-                            Region = request.QueryString["Region"],
-                            SummonerName = request.QueryString["Username"]
-                        });
-                        return JsonConvert.SerializeObject(_users.GetUserList());
-                    }
-                    else if (request.RawUrl.StartsWith("/api/delete"))
-                    {
-                        if (request.QueryString == null && request.QueryString.Count != 2)
-                            return "400";
-
-                        User u = _users.GetUser(request.QueryString["Username"], request.QueryString["Region"]);
-                        _users.RemoveUser(u);
-
-                        return JsonConvert.SerializeObject(_users.GetUserList());
-                    }
-                    else if (request.RawUrl.StartsWith("/api/regions"))
-                    {
-                        return JsonConvert.SerializeObject(Shards.GetStatus());
-                    }
-                    else if (request.RawUrl.StartsWith("/api/login"))
-                    {
-                        if (request.QueryString == null && request.QueryString.Count != 2)
-                            return "400";
-
-                        string Username = request.QueryString["Username"];
-                        string Region = request.QueryString["Region"];
-
-                        var ShardList = Shards.GetInstances<BaseShard>();
-                        BaseShard shard = null;
-                        foreach (BaseShard s in ShardList)
-                            if (s.Name == Region)
-                                shard = s;
-
-                        User user = _users.GetUser(Username, Region);
-                        ForwardPlayer player = new ForwardPlayer(user, shard, _context);
-                        bool Connected = await player.Connect(user, shard);
-
-                        _forwarder.Assign(player);
-
-                        return JsonConvert.SerializeObject("OK");
-                    }
-                    else
-                    {
-                        return "404";
-                    }
-                }
-                #endregion
 
                 string ReadURL = request.RawUrl;
                 if (ReadURL == "/")
@@ -297,6 +223,68 @@ namespace PoroLib
             }
         }
 
+        public async Task<object> HandleAPI(HttpListenerRequest request)
+        {
+            if (request.RawUrl.StartsWith("/api/users"))
+            {
+                return JsonConvert.SerializeObject(_users.GetUserList());
+            }
+            else if (request.RawUrl.StartsWith("/api/register"))
+            {
+                if (request.QueryString == null && request.QueryString.Count != 4)
+                    return "400";
+            
+                _users.AddUser(new User
+                {
+                    Username = request.QueryString["Username"],
+                    Password = request.QueryString["Password"],
+                    Region = request.QueryString["Region"],
+                    SummonerName = request.QueryString["Username"]
+                });
+                return JsonConvert.SerializeObject(_users.GetUserList());
+            }
+            else if (request.RawUrl.StartsWith("/api/delete"))
+            {
+                if (request.QueryString == null && request.QueryString.Count != 2)
+                    return "400";
+            
+                User u = _users.GetUser(request.QueryString["Username"], request.QueryString["Region"]);
+                _users.RemoveUser(u);
+            
+                return JsonConvert.SerializeObject(_users.GetUserList());
+            }
+            else if (request.RawUrl.StartsWith("/api/regions"))
+            {
+                return JsonConvert.SerializeObject(Shards.GetStatus());
+            }
+            else if (request.RawUrl.StartsWith("/api/login"))
+            {
+                if (request.QueryString == null && request.QueryString.Count != 2)
+                    return "400";
+            
+                string Username = request.QueryString["Username"];
+                string Region = request.QueryString["Region"];
+            
+                var ShardList = Shards.GetInstances<BaseShard>();
+                BaseShard shard = null;
+                foreach (BaseShard s in ShardList)
+                    if (s.Name == Region)
+                        shard = s;
+            
+                User user = _users.GetUser(Username, Region);
+                ForwardPlayer player = new ForwardPlayer(user, shard, _context);
+                bool Connected = await player.Connect(user, shard);
+            
+                _forwarder.Assign(player);
+            
+                return JsonConvert.SerializeObject("OK");
+            }
+            else
+            {
+                return "404";
+            }
+        }
+
         public static List<T> GetInstances<T>()
         {
             return (from t in Assembly.GetExecutingAssembly().GetTypes()
@@ -319,13 +307,6 @@ namespace PoroLib
 
                 client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", clientConfig);
             }
-
-            /*var tempCommand = _forwarder.HandleCommand(sender, e);
-
-            Task.WaitAll(tempCommand);
-
-            RtmpClient client = sender as RtmpClient;
-            client.InvokeResult(e.InvokeId, e.Message.CorrelationId, tempCommand);*/
         }
     }
 }

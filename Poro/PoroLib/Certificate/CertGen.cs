@@ -38,9 +38,7 @@ namespace PoroLib.Certificate
             PKCS12 p12 = new PKCS12();
             p12.AddCertificate(new Mono.Security.X509.X509Certificate(rawcert));
             p12.AddPkcs8ShroudedKeyBag(subjectKey);
-            p12.SaveToFile("cert.p12");
-
-            return new X509Certificate2("cert.p12", "", X509KeyStorageFlags.Exportable);
+            return new X509Certificate2(p12.GetBytes());
         }
     }
 }
