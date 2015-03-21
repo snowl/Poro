@@ -11,8 +11,7 @@ namespace PoroLib.Structures
         [SerializedName("items")]
         public object Items { get; set; }
         [SerializedName("talentTree")]
-        public FluorineFx.AMF3.ArrayCollection TalentTree { get; set; } 
-        //public List<TalentGroup> TalentTree { get; set; }
+        public List<TalentGroup> TalentTree { get; set; }
         [SerializedName("spellBookConfig")]
         public List<RuneSlot> SpellBookConfig { get; set; }
     }
