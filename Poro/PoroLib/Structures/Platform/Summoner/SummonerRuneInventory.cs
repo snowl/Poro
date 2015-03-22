@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace PoroLib.Structures
         public Double SummonerId { get; set; }
 
         [SerializedName("summonerRunes")]
-        public List<SummonerRune> SummonerRunes { get; set; }
+        public ArrayCollection SummonerRunes { get; set; }
 
         [SerializedName("dateString")]
         public String DateString { get; set; }

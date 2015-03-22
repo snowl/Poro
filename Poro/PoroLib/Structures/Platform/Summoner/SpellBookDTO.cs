@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ namespace PoroLib.Structures
         [SerializedName("bookPagesJson")]
         public object BookPagesJson { get; set; }
         [SerializedName("bookPages")]
-        public List<SpellBookPageDTO> BookPages { get; set; }
+        public ArrayCollection BookPages { get; set; }
         [SerializedName("dateString")]
         public String DateString { get; set; }
         [SerializedName("summonerId")]

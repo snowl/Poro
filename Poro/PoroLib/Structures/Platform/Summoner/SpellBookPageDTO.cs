@@ -1,4 +1,5 @@
 ﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -9,7 +10,7 @@ namespace PoroLib.Structures
     public class SpellBookPageDTO
     {
         [SerializedName("slotEntries")]
-        public List<SlotEntry> SlotEntries { get; set; }
+        public ArrayCollection SlotEntries { get; set; }
         [SerializedName("summonerId")]
         public Double SummonerId { get; set; }
         [SerializedName("createDate")]

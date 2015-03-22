@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -9,7 +10,7 @@ namespace PoroLib.Structures
     public class MasteryBookPageDTO
     {
         [SerializedName("talentEntries")]
-        public List<TalentEntry> TalentEntries { get; set; }
+        public ArrayCollection TalentEntries { get; set; }
         [SerializedName("pageId")]
         public Double PageId { get; set; }
         [SerializedName("name")]

@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -31,9 +32,9 @@ namespace PoroLib.Structures
         [SerializedName("reconnectInfo")]
         public object ReconnectInfo { get; set; }
         [SerializedName("languages")]
-        public List<string> Locales { get; set; }
+        public ArrayCollection Locales { get; set; }
         [SerializedName("simpleMessages")]
-        public List<object> SimpleMessages { get; set; }
+        public ArrayCollection SimpleMessages { get; set; }
         [SerializedName("allSummonerData")]
         public AllSummonerData AllSummonerData { get; set; }
         [SerializedName("customMinutesLeftToday")]
@@ -77,7 +78,7 @@ namespace PoroLib.Structures
         [SerializedName("rpBalance")]
         public Double RpBalance { get; set; }
         [SerializedName("gameTypeConfigs")]
-        public List<GameTypeConfigDTO> GameTypeConfigs { get; set; }
+        public ArrayCollection GameTypeConfigs { get; set; }
         [SerializedName("bingeIsPlayerInBingePreventionWindow")]
         public Boolean BingeIsPlayerInBingePreventionWindow { get; set; }
         [SerializedName("minorShutdownEnforced")]

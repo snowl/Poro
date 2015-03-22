@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -42,6 +43,6 @@ namespace PoroLib.Structures
         public Double PurchaseDateTime { get; set; }
 
         [SerializedName("championSkins")]
-        public List<ChampionSkinDTO> ChampionSkins { get; set; }
+        public ArrayCollection ChampionSkins { get; set; }
     }
 }

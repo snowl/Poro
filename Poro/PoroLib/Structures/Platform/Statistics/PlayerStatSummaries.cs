@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +14,6 @@ namespace PoroLib.Structures
         [SerializedName("userId")]
         public Int32 UserID { get; set; }
         [SerializedName("playerStatSummarySet")]
-        public List<PlayerStatSummary> SummaryList { get; set; }
+        public ArrayCollection SummaryList { get; set; }
     }
 }

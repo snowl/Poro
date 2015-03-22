@@ -1,4 +1,5 @@
-﻿using RtmpSharp.Messaging;
+﻿using RtmpSharp.IO.AMF3;
+using RtmpSharp.Messaging;
 using System.Collections.Generic;
 
 namespace PoroLib.Messages.LcdsGameInvitationService
@@ -8,7 +9,7 @@ namespace PoroLib.Messages.LcdsGameInvitationService
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
         {
             e.ReturnRequired = true;
-            e.Data = new List<object>();
+            e.Data = new ArrayCollection();
 
             return e;
         }

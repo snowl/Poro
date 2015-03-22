@@ -1,5 +1,6 @@
 ﻿using PoroLib.Data.SQLite;
 using PoroLib.Structures;
+using RtmpSharp.IO.AMF3;
 using RtmpSharp.Messaging;
 using SQLite;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace PoroLib.Messages.InventoryService
     {
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
         {
-            List<ChampionDTO> champions = new List<ChampionDTO>();
+            ArrayCollection champions = new ArrayCollection();
 
             foreach (Champions champ in PoroServer._data.Champions)
             {
@@ -25,13 +26,20 @@ namespace PoroLib.Messages.InventoryService
                     RankedPlayEnabled = true
                 };
 
-                champDTO.ChampionSkins = PoroServer._data.ChampionSkins.Where(x => x.championId == champ.id).Select(skins => new ChampionSkinDTO
+                champDTO.ChampionSkins = new ArrayCollection();
+
+                IEnumerable<ChampionSkinDTO> champSkinData = PoroServer._data.ChampionSkins.Where(x => x.championId == champ.id).Select(skins => new ChampionSkinDTO
                 {
                     ChampionID = champ.id,
                     SkinID = skins.id,
                     StillObtainable = true,
                     Owned = true
-                }).ToList();
+                });
+
+                foreach (ChampionSkinDTO champion in champSkinData)
+                {
+                    champDTO.ChampionSkins.Add(champion);
+                }
 
                 champions.Add(champDTO);
             }

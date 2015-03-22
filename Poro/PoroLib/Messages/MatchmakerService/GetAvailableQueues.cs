@@ -1,4 +1,5 @@
 ﻿using PoroLib.Structures;
+using RtmpSharp.IO.AMF3;
 using RtmpSharp.Messaging;
 using System.Collections.Generic;
 
@@ -8,7 +9,7 @@ namespace PoroLib.Messages.MatchmakerService
     {
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
         {
-            List<GameQueueConfig> data = new List<GameQueueConfig>
+            ArrayCollection data = new ArrayCollection
             {
                 new GameQueueConfig {
                     BlockedMinutesThreshold = 60,
@@ -29,7 +30,7 @@ namespace PoroLib.Messages.MatchmakerService
                     TeamOnly = false,
                     MinimumQueueDodgeDelayTime = 8000,
                     RandomizeTeamSides = false,
-                    SupportedMapIds = new List<int>{ 11, 1 },
+                    SupportedMapIds = new ArrayCollection{ 11, 1 },
                     GameMode = "CLASSIC",
                     TypeString = "NORMAL",
                     NumPlayersPerTeam = 5,
@@ -37,13 +38,13 @@ namespace PoroLib.Messages.MatchmakerService
                     MaximumParticipantListSize = 5,
                     MapSelectionAlgorithm = "FIRST",
                     BotsCanSpawnOnBlueSide = true,
-                    GameMutators = new List<string>{ "HudSkin(Freljord)" },
+                    GameMutators = new ArrayCollection{ "HudSkin(Freljord)" },
                     ThresholdSize = 2147483647.0,
                     MatchingThrottleConfig = new MatchingThrottleConfig
                     {
                         CacheName = "",
                         Limit = 2147483647.0,
-                        MatchingThrottleProperties = new List<object>()
+                        MatchingThrottleProperties = new ArrayCollection()
                     }
                 }
             };

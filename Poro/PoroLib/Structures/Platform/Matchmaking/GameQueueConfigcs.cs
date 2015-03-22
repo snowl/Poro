@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -65,10 +66,10 @@ namespace PoroLib.Structures
         public Int32 MinimumQueueDodgeDelayTime { get; set; }
 
         [SerializedName("supportedMapIds")]
-        public List<Int32> SupportedMapIds { get; set; }
+        public ArrayCollection SupportedMapIds { get; set; }
 
         [SerializedName("gameMutators")]
-        public List<string> GameMutators { get; set; }
+        public ArrayCollection GameMutators { get; set; }
 
         [SerializedName("gameMode")]
         public String GameMode { get; set; }

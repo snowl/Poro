@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ namespace PoroLib.Structures
         [SerializedName("index")]
         public Int32 Index { get; set; }
         [SerializedName("talents")]
-        public List<Talent> Talents { get; set; }
+        public ArrayCollection Talents { get; set; }
         [SerializedName("tltGroupId")]
         public Int32 TltGroupId { get; set; }
         [SerializedName("pointsToActivate")]

@@ -1,4 +1,5 @@
 ﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -11,8 +12,8 @@ namespace PoroLib.Structures
         [SerializedName("items")]
         public object Items { get; set; }
         [SerializedName("talentTree")]
-        public List<TalentGroup> TalentTree { get; set; }
+        public ArrayCollection TalentTree { get; set; }
         [SerializedName("spellBookConfig")]
-        public List<RuneSlot> SpellBookConfig { get; set; }
+        public ArrayCollection SpellBookConfig { get; set; }
     }
 }

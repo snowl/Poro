@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -12,6 +13,6 @@ namespace PoroLib.Structures
         public object StatsJson { get; set; }
 
         [SerializedName("stats")]
-        public List<SummaryAggStat> Stats { get; set; }
+        public ArrayCollection Stats { get; set; }
     }
 }

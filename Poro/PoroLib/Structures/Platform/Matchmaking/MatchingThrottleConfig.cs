@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace PoroLib.Structures
         public Double Limit { get; set; }
 
         [SerializedName("matchingThrottleProperties")]
-        public List<object> MatchingThrottleProperties { get; set; }
+        public ArrayCollection MatchingThrottleProperties { get; set; }
 
         [SerializedName("cacheName")]
         public String CacheName { get; set; }

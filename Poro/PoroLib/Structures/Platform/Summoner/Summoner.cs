@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 using System.Collections.Generic;
 
@@ -41,6 +42,6 @@ namespace PoroLib.Structures
         [SerializedName("tutorialFlag")]
         public Boolean TutorialFlag { get; set; }
         [SerializedName("socialNetworkUserIds")]
-        public List<object> SocialNetworkUserIds { get; set; }
+        public ArrayCollection SocialNetworkUserIds { get; set; }
     }
 }

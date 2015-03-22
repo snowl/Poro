@@ -1,4 +1,5 @@
 ﻿using PoroLib.Structures;
+using RtmpSharp.IO.AMF3;
 using RtmpSharp.Messaging;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace PoroLib.Messages.SummonerRuneService
             {
                 DateString = "Thu Jun 27 20:58:33 PDT 2013",
                 SummonerId = int.MaxValue - 1,
-                SummonerRunes = new List<SummonerRune>()
+                SummonerRunes = new ArrayCollection()
             };
 
             e.ReturnRequired = true;

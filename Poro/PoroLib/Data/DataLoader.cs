@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using PoroLib.Data.JSON;
 using PoroLib.Data.SQLite;
 using PoroLib.Structures;
+using RtmpSharp.IO.AMF3;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,8 @@ namespace PoroLib.Data
         public bool _hasLoaded;
         public List<Champions> Champions;
         public List<ChampionSkins> ChampionSkins;
-        public List<TalentGroup> TalentTree;
-        public List<RuneSlot> RuneTree;
+        public ArrayCollection TalentTree;
+        public ArrayCollection RuneTree;
 
         private Dictionary<string, int> _masterySort = new Dictionary<string, int> { { "Offense", 1 }, { "Defense", 2 }, { "Utility", 3 } };
 
@@ -53,20 +54,20 @@ namespace PoroLib.Data
 
                 #region Mastery loading
                 Masteries mData = JsonConvert.DeserializeObject<Masteries>(MasteryData);
-                TalentTree = new List<TalentGroup>();
+                TalentTree = new ArrayCollection();
                 foreach (KeyValuePair<string, List<List<MasteryLite>>> mastery in mData.tree)
                 {
                     TalentGroup group = new TalentGroup
                     {
                         Name = mastery.Key,
-                        TalentRows = new List<TalentRow>(),
+                        TalentRows = new ArrayCollection(),
                         TltGroupId = _masterySort[mastery.Key],
                         Index = _masterySort[mastery.Key] - 1
                     };
 
                     for (int i = 0; i < mastery.Value.Count; i++)
                     {
-                        List<Talent> talentList = new List<Talent>();
+                        ArrayCollection talentList = new ArrayCollection();
                         List<MasteryLite> masteryList = mastery.Value[i];
                         for (int j = 0; j < masteryList.Count; j++)
                         {
@@ -115,7 +116,7 @@ namespace PoroLib.Data
                 #endregion
 
                 #region Rune Loading
-                RuneTree = new List<RuneSlot>();
+                RuneTree = new ArrayCollection();
 
                 //This code is... bad. 
                 int Modifier = 0; //Skip 10, 20, 30
@@ -132,10 +133,7 @@ namespace PoroLib.Data
                     //The id goes past 9 so add the required amount that we have looped
                     int IdAdd = (Math.Abs(Take - 3) * 10);
                     //Take the amount that it has gone over
-                    if (Take != 3)
-                    {
-                        IdAdd -= Math.Abs(Take - 3);
-                    }
+                    IdAdd -= Math.Abs(Take - 3);
 
                     RuneSlot slot = new RuneSlot()
                     {
