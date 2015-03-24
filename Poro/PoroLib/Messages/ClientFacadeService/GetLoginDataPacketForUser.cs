@@ -53,7 +53,7 @@ namespace PoroLib.Messages.ClientFacadeService
                                     },
                                     new SpellBookPageDTO
                                     {
-                                        Current = true,
+                                        Current = false,
                                         SummonerId = int.MaxValue - 1,
                                         PageId = 3.0,
                                         CreateDate = DateTime.Now,
@@ -117,14 +117,14 @@ namespace PoroLib.Messages.ClientFacadeService
                         InfTierMod = 1.0,
                         ExpToNextLevel = 90.0,
                         ExpForWin = 72.0,
-                        Level = 999.0
+                        Level = 99.0
                     },
                     SummonerLevelAndPoints = new SummonerLevelAndPoints
                     {
                         InfPoints = 0.0,
                         ExpPoints = 0.0,
                         SummonerId = int.MaxValue - 1,
-                        SummonerLevel = 999.0
+                        SummonerLevel = 99.0
                     }
                 },
                 CustomMinutesLeftToday = -1,

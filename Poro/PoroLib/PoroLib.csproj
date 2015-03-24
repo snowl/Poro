@@ -87,6 +87,7 @@
     <Compile Include="Messages\LoginService\Login.cs" />
     <Compile Include="Messages\LoginService\Logout.cs" />
     <Compile Include="Messages\MasteryBookService\GetMasteryBook.cs" />
+    <Compile Include="Messages\MatchmakerService\AttachToQueue.cs" />
     <Compile Include="Messages\MatchmakerService\GetAvailableQueues.cs" />
     <Compile Include="Messages\MessageHandler.cs" />
     <Compile Include="Messages\PlayerPreferencesService\LoadPreferencesByKey.cs" />
@@ -113,8 +114,10 @@
     <Compile Include="Structures\Platform\Game\GameTypeConfigDTO.cs" />
     <Compile Include="Structures\Platform\Login\AuthenticationCredentials.cs" />
     <Compile Include="Structures\Platform\Login\Session.cs" />
-    <Compile Include="Structures\Platform\Matchmaking\GameQueueConfigcs.cs" />
+    <Compile Include="Structures\Platform\Matchmaking\GameQueueConfigs.cs" />
     <Compile Include="Structures\Platform\Matchmaking\MatchingThrottleConfig.cs" />
+    <Compile Include="Structures\Platform\Matchmaking\QueueDisabled.cs" />
+    <Compile Include="Structures\Platform\Matchmaking\SearchingForMatchNotification.cs" />
     <Compile Include="Structures\Platform\Statistics\PlayerStatSummaries.cs" />
     <Compile Include="Structures\Platform\Statistics\PlayerStatSummary.cs" />
     <Compile Include="Structures\Platform\Statistics\SummaryAggStat.cs" />

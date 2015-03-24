@@ -18,7 +18,7 @@ namespace PoroLib.Messages.MatchmakerService
                     MaxLevel = 100,
                     ThresholdEnabled = false,
                     GameTypeConfigId = 1,
-                    MinLevel = 3,
+                    MinLevel = 1,
                     QueueState = "ON",
                     Type = "NORMAL",
                     CacheName = "matching-queue-NORMAL-5x5-game-queue",
