@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+//using XMPPP;
 
 namespace PoroLib
 {
@@ -41,6 +42,7 @@ namespace PoroLib
         private MessageForwarder _forwarder;
         private PropertyRedirector _redirector;
         private UserHandler _users;
+        //private XMPPServer _chat;
 
         public PoroServer(PoroServerSettings settings)
         {
@@ -50,7 +52,7 @@ namespace PoroLib
             _auth = new AuthServer(HandleWebServ, _settings.AuthLocations);
 
             //Load the certificate store for the RTMPS server
-            var certificateStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
+            var certificateStore = new X509Store(StoreName.TrustedPeople, StoreLocation.LocalMachine);
             certificateStore.Open(OpenFlags.MaxAllowed);
 
             //Remove last certificate in case it wasn't deleted on close
@@ -103,6 +105,9 @@ namespace PoroLib
 
             //Set up the user server
             _users = new UserHandler();
+
+            //Set up the chat server
+            //_chat = new XMPPServer(new IPEndPoint(IPAddress.Parse(_settings.RTMPSHost), 5223), _rtmpsCert);
         }
 
         void ClientMessageReceived(object sender, RemotingMessageReceivedEventArgs e)
@@ -114,7 +119,10 @@ namespace PoroLib
             if (_forwarder.Forwarding)
             {
                 var handleTask = _forwarder.Handle(sender, e);
-                Task.WaitAll(handleTask);
+
+                //Wait for Riot's server to respond
+                Task.WaitAll(handleTask); 
+
                 tempRecv = handleTask.Result;
                 wasForwarded = true;
             }
@@ -148,6 +156,9 @@ namespace PoroLib
 
             Console.WriteLine("[LOG] RTMPS Server listening at rtmps://{0}:{1}", _settings.RTMPSHost, _settings.RTMPSPort);
             _server.Listen();
+
+            //Console.WriteLine("[LOG] Chat Server listening at xmpp://{0}:{1}", _settings.RTMPSHost, 5223);
+            //_chat.Listen();
         }
 
         public async Task<object> HandleWebServ(HttpListenerRequest request)

@@ -58,6 +58,7 @@ namespace PoroLib.Redirector
             //Generate the properties according to the current client's IP address
             PoroProperties properties = new PoroProperties();
             properties.host = _settings.RTMPSHost;
+            properties.xmpp_server_url = _settings.RTMPSHost;
             //properties.host = "prod.oc1.lol.riotgames.com"; //Uncomment for LoLNotes
 
             BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;

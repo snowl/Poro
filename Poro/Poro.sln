@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rtmp-sharp", "..\..\rtmp-sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoroLib", "PoroLib\PoroLib.csproj", "{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMPPP", "..\..\XMPPP\XMPPP\XMPPP.csproj", "{999CB090-7648-4B04-99B9-71C76EDF7027}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,12 @@ Global
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Debug-FileSystem|Any CPU.Build.0 = Debug-FileSystem|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06C3AD01-A047-4AD1-90AE-E3C3259DE61C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Debug-FileSystem|Any CPU.ActiveCfg = Debug|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Debug-FileSystem|Any CPU.Build.0 = Debug|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{999CB090-7648-4B04-99B9-71C76EDF7027}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -101,7 +101,7 @@ namespace PoroLib.Structures
 
         public void WriteExternal(IDataOutput output)
         {
-            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this));
+            var bytes = Encoding.UTF8.GetBytes(Json);
 
             output.WriteInt32(bytes.Length);
             output.WriteBytes(bytes);
