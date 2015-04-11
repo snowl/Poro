@@ -1,13 +1,14 @@
-﻿using RtmpSharp.Messaging;
+﻿using PoroLib.Structures;
+using RtmpSharp.Messaging;
 
-namespace PoroLib.Messages.SummonerTeamService
+namespace PoroLib.Messages.LoginService
 {
-    class CreatePlayer : IMessage
+    class PerformLCDSHeartBeat : IMessage
     {
         public RemotingMessageReceivedEventArgs HandleMessage(object sender, RemotingMessageReceivedEventArgs e)
         {
             e.ReturnRequired = true;
-            e.Data = null;
+            e.Data = "5";
 
             return e;
         }

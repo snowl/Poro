@@ -19,6 +19,24 @@ namespace PoroLib.Messages.ClientFacadeService
                     UserID = int.MaxValue - 2, //Account ID
                     Season = 5,
                     SummaryList = new ArrayCollection()
+                    {
+                        new PlayerStatSummary
+                        {
+                            MaxRating = 0,
+                            TypeString = "Unranked",
+                            Type = "Unranked",
+                            AggregatedStats = new SummaryAggStats
+                            {
+                                Stats = new ArrayCollection()
+                            },
+                            UserId = int.MaxValue - 2,
+                            Losses = 0,
+                            Wins = 0,
+                            Leaves = 0,
+                            Rating = 400,
+                            ModifyDate = new DateTime(1428707144676)
+                        }
+                    }
                 },
                 RestrictedChatGamesRemaining = -1,
                 MinutesUntilShutdown = -1,
@@ -117,14 +135,14 @@ namespace PoroLib.Messages.ClientFacadeService
                         InfTierMod = 1.0,
                         ExpToNextLevel = 90.0,
                         ExpForWin = 72.0,
-                        Level = 99.0
+                        Level = 9.0
                     },
                     SummonerLevelAndPoints = new SummonerLevelAndPoints
                     {
                         InfPoints = 0.0,
                         ExpPoints = 0.0,
                         SummonerId = int.MaxValue - 1,
-                        SummonerLevel = 99.0
+                        SummonerLevel = 9.0
                     }
                 },
                 CustomMinutesLeftToday = -1,
@@ -141,7 +159,7 @@ namespace PoroLib.Messages.ClientFacadeService
                 BingeMinutesRemaining = 0,
                 PendingKudosDTO = new PendingKudosDTO
                 {
-                    PendingCounts = new int[5] { 0, 0, 0, 0, 0 }
+                    PendingCounts = new ArrayCollection() { 0, 0, 0, 0, 0 }
                 },
                 LeaverBusterPenaltyTime = 60,
                 PlatformId = "OC1",

@@ -1,4 +1,5 @@
 ﻿﻿using RtmpSharp.IO;
+using RtmpSharp.IO.AMF3;
 using System;
 
 namespace PoroLib.Structures
@@ -8,6 +9,6 @@ namespace PoroLib.Structures
     public class PendingKudosDTO
     {
         [SerializedName("pendingCounts")]
-        public Int32[] PendingCounts { get; set; }
+        public ArrayCollection PendingCounts { get; set; }
     }
 }

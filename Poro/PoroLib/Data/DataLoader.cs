@@ -25,36 +25,47 @@ namespace PoroLib.Data
 
         private Dictionary<string, int> _masterySort = new Dictionary<string, int> { { "Offense", 1 }, { "Defense", 2 }, { "Utility", 3 } };
 
+        /// <summary>
+        /// Load the data for packets for League of Legends on patcher launch
+        /// </summary>
         public void LoadData()
         {
+            //Only load the data once
             if (_hasLoaded)
                 return;
 
             _hasLoaded = true;
 
+            //Load the gameStats from the client (the client location is loaded when the patcher runes)
             SQLiteConnection conn = new SQLiteConnection(Path.Combine(PoroServer.ClientLocation, "assets", "data", "gameStats", "gameStats_en_US.sqlite"));
 
+            //Generate the champion list
             Champions = (from s in conn.Table<Champions>() orderby s.name select s).ToList();
 
+            //Generate the champion skin list
             ChampionSkins = (from s in conn.Table<ChampionSkins>() select s).ToList();
 
+            //Close the SQLite connection
             conn.Close();
 
             using (WebClient client = new WebClient())
             {
-                string Versions = client.DownloadString("http://ddragon.leagueoflegends.com/realms/euw.js"); //Download latest ddragoon
+                //Download latest ddragon
+                string Versions = client.DownloadString("http://ddragon.leagueoflegends.com/realms/euw.js");
+                //Get the ddragon version
                 Versions = Versions.Replace(";", "").Replace("Riot.DDragon.m=", "");
                 JObject DDragonObject = JsonConvert.DeserializeObject<JObject>(Versions);
                 JObject DDragonVersions = DDragonObject["n"] as JObject;
 
-                string RuneVersion = DDragonVersions["rune"].ToString();
+                //Download the latest mastery daata
                 string MasteryVersion = DDragonVersions["mastery"].ToString();
-
                 string MasteryData = client.DownloadString(string.Format("http://ddragon.leagueoflegends.com/cdn/{0}/data/en_US/mastery.json", MasteryVersion));
 
                 #region Mastery loading
                 Masteries mData = JsonConvert.DeserializeObject<Masteries>(MasteryData);
                 TalentTree = new ArrayCollection();
+
+                //Parse the data and convert it into a type that is sent in the LoginDataPacket
                 foreach (KeyValuePair<string, List<List<MasteryLite>>> mastery in mData.tree)
                 {
                     TalentGroup group = new TalentGroup

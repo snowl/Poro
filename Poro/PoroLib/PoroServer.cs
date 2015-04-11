@@ -91,7 +91,7 @@ namespace PoroLib
             _handler.Register("SummonerRuneService");
             _handler.Register("PlayerPreferencesService");
             _handler.Register("LcdsGameInvitationService");
-            _handler.Register("SummonerTeamService");
+            _handler.Register("LeaguesServiceProxy");
 
             //Set up the forwarder
             _forwarder = new MessageForwarder(_context);
@@ -286,7 +286,18 @@ namespace PoroLib
             
                 User user = _users.GetUser(Username, Region);
                 ForwardPlayer player = new ForwardPlayer(user, shard, _context);
-                bool Connected = await player.Connect(user, shard);
+                bool Connected = await player.Connect();
+                
+                foreach (RtmpClient client in _server.Clients)
+                {
+                    StoreAccountBalanceNotification notification = new StoreAccountBalanceNotification
+                    {
+                        IP = player._packet.IpBalance,
+                        RP = player._packet.RpBalance
+                    };
+
+                    client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", notification);
+                }
             
                 _forwarder.Assign(player);
 

@@ -10,18 +10,36 @@ namespace PoroLib.Forwarder
     {
         private ForwardPlayer _client;
         private SerializationContext _context;
+        
+        /// <summary>
+        /// Returns if the MessageForwarder is forwarding messages
+        /// </summary>
         public bool Forwarding { get { return _client != null; } }
 
+        /// <summary>
+        /// Creates a new  message forwarder with the specified context
+        /// </summary>
+        /// <param name="context">The serialization context</param>
         public MessageForwarder(SerializationContext context)
         {
             _context = context;
         }
 
+        /// <summary>
+        /// Assigns a forward player to the message forwarder
+        /// </summary>
+        /// <param name="client"></param>
         public void Assign(ForwardPlayer client)
         {
             _client = client;
         }
 
+        /// <summary>
+        /// Forwards a message request to the forward player
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">The message to forward</param>
+        /// <returns></returns>
         public async Task<RemotingMessageReceivedEventArgs> Handle(object sender, RemotingMessageReceivedEventArgs e)
         {
             if (_client == null)
@@ -59,7 +77,7 @@ namespace PoroLib.Forwarder
                 result = await _client.Forward<object>(e.Destination, e.Operation);
             }
 
-            //Do we need to change it back? Who knows!
+            //Do we need to change it back? Who knows! Seems to work at the moment
 
             e.Data = result;
             e.ReturnRequired = true;
@@ -67,6 +85,12 @@ namespace PoroLib.Forwarder
             return e;
         }
 
+        /// <summary>
+        /// Forwards a command. Currently not used
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">The command to forward</param>
+        /// <returns></returns>
         public async Task<object> HandleCommand(object sender, CommandMessageReceivedEventArgs e)
         {
             if (_client == null)

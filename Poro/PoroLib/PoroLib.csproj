@@ -51,10 +51,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="rtmp-sharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\rtmp-sharp\obj\Debug\rtmp-sharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -84,15 +80,16 @@
     <Compile Include="Messages\InventoryService\GetSumonerActiveBoosts.cs" />
     <Compile Include="Messages\LcdsGameInvitationService\CheckLobbyStatus.cs" />
     <Compile Include="Messages\LcdsGameInvitationService\GetPendingInvitations.cs" />
+    <Compile Include="Messages\LeaguesServiceProxy\GetMyLeaguePositions.cs" />
     <Compile Include="Messages\LoginService\Login.cs" />
     <Compile Include="Messages\LoginService\Logout.cs" />
+    <Compile Include="Messages\LoginService\PerformLCDSHeartBeat.cs" />
     <Compile Include="Messages\MasteryBookService\GetMasteryBook.cs" />
     <Compile Include="Messages\MatchmakerService\AttachToQueue.cs" />
     <Compile Include="Messages\MatchmakerService\GetAvailableQueues.cs" />
     <Compile Include="Messages\MessageHandler.cs" />
     <Compile Include="Messages\PlayerPreferencesService\LoadPreferencesByKey.cs" />
     <Compile Include="Messages\SummonerRuneService\GetSummonerRuneInventory.cs" />
-    <Compile Include="Messages\SummonerTeamService\CreatePlayer.cs" />
     <Compile Include="PoroServer.cs" />
     <Compile Include="PoroServerSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -112,12 +109,14 @@
     <Compile Include="Structures\Platform\Client\ClientDynamicConfigurationNotification.cs" />
     <Compile Include="Structures\Platform\Game\GameNotification.cs" />
     <Compile Include="Structures\Platform\Game\GameTypeConfigDTO.cs" />
+    <Compile Include="Structures\Platform\Leagues\SummonerLeagueItemsDTO.cs" />
     <Compile Include="Structures\Platform\Login\AuthenticationCredentials.cs" />
     <Compile Include="Structures\Platform\Login\Session.cs" />
     <Compile Include="Structures\Platform\Matchmaking\GameQueueConfigs.cs" />
     <Compile Include="Structures\Platform\Matchmaking\MatchingThrottleConfig.cs" />
     <Compile Include="Structures\Platform\Matchmaking\QueueDisabled.cs" />
     <Compile Include="Structures\Platform\Matchmaking\SearchingForMatchNotification.cs" />
+    <Compile Include="Structures\Platform\Messaging\StoreAccountBalanceNotification.cs" />
     <Compile Include="Structures\Platform\Statistics\PlayerStatSummaries.cs" />
     <Compile Include="Structures\Platform\Statistics\PlayerStatSummary.cs" />
     <Compile Include="Structures\Platform\Statistics\SummaryAggStat.cs" />
@@ -149,6 +148,17 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\rtmp-sharp\rtmp-sharp.csproj">
+      <Project>{aa1a4f5d-3bd4-4832-9f5d-90727007727e}</Project>
+      <Name>rtmp-sharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\XMPPP\XMPPP\XMPPP.csproj">
+      <Project>{999cb090-7648-4b04-99b9-71c76edf7027}</Project>
+      <Name>XMPPP</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
