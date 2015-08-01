@@ -27,7 +27,7 @@ namespace PoroLib
 {
     public class PoroServer
     {
-        private static string _clientVersion = "";
+        private static string _clientVersion = "5.14.15_07_17_17_29";
         public static string ClientVersion { get { return _clientVersion; } set { _clientVersion = value; } }
         private static string _clientLocation = "";
         public static string ClientLocation { get { return _clientLocation; } set { _clientLocation = value; } }
@@ -116,7 +116,7 @@ namespace PoroLib
 
             //Forward message to connected server
             RemotingMessageReceivedEventArgs tempRecv = null;
-            if (_forwarder.Forwarding)
+            if (_forwarder.Forwarding && e.Operation != "login")
             {
                 var handleTask = _forwarder.Handle(sender, e);
 
@@ -246,7 +246,7 @@ namespace PoroLib
             {
                 if (request.QueryString == null && request.QueryString.Count != 4)
                     return "400";
-            
+
                 _users.AddUser(new User
                 {
                     Username = request.QueryString["Username"],
@@ -260,10 +260,10 @@ namespace PoroLib
             {
                 if (request.QueryString == null && request.QueryString.Count != 2)
                     return "400";
-            
+
                 User u = _users.GetUser(request.QueryString["Username"], request.QueryString["Region"]);
                 _users.RemoveUser(u);
-            
+
                 return JsonConvert.SerializeObject(_users.GetUserList());
             }
             else if (request.RawUrl.StartsWith("/api/regions"))
@@ -274,20 +274,20 @@ namespace PoroLib
             {
                 if (request.QueryString == null && request.QueryString.Count != 2)
                     return "400";
-            
+
                 string Username = request.QueryString["Username"];
                 string Region = request.QueryString["Region"];
-            
+
                 var ShardList = Shards.GetInstances<BaseShard>();
                 BaseShard shard = null;
                 foreach (BaseShard s in ShardList)
                     if (s.Name == Region)
                         shard = s;
-            
+
                 User user = _users.GetUser(Username, Region);
                 ForwardPlayer player = new ForwardPlayer(user, shard, _context);
                 bool Connected = await player.Connect();
-                
+
                 foreach (RtmpClient client in _server.Clients)
                 {
                     StoreAccountBalanceNotification notification = new StoreAccountBalanceNotification
@@ -298,12 +298,19 @@ namespace PoroLib
 
                     client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", notification);
                 }
-            
+
                 _forwarder.Assign(player);
 
                 Console.WriteLine(string.Format("[LOG] Forwarding to {0} ({1})", Username, Region));
-            
+
                 return JsonConvert.SerializeObject("OK");
+            }
+            else if (request.RawUrl.StartsWith("/api/check"))
+            {
+                if (_forwarder.Forwarding)
+                    return JsonConvert.SerializeObject(_forwarder._client._user);
+                else
+                    return JsonConvert.SerializeObject("Not logged in");
             }
             else
             {
@@ -321,10 +328,10 @@ namespace PoroLib
                 {
                     Delta = false,
                     //TODO: not have this data stored in code
-                    Config = "{\"PlatformShutdown\":{\"Enabled\":null},\"BotConfigurations\":{\"IntermediateInCustoms\":true},\"ShareMatchHistory\":{\"MatchHistoryUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#login?redirect=%23player-search%2FcurrentAccount%2FOC1%2F{0}\",\"AdvancedGameDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"AdvancedGameDetailsEnabled\":true,\"MatchDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}\",\"ShareEndOfGameEnabled\":true,\"ShareGameUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"MatchHistoryEnabled\":true},\"GuestSlots\":{\"Enabled\":null},\"ServiceStatusAPI\":{\"Enabled\":true},\"GameTimerSync\":{\"Enabled\":false,\"PercentOfTotalTimerToSyncAt\":0.8},\"QueueRestriction\":{\"ServiceEnabled\":true,\"RankedDuoQueueRestrictionMode\":\"TIER\",\"KarmaEnabled\":false,\"RankedDuoQueueRestrictionMaxDelta\":1,\"RankedDuoQueueDefaultUnseededTier\":\"SILVER\"},\"DockedPrompt\":{\"EnabledNewDockedPromptRenderer\":true},\"PartyRewards\":{\"Enabled\":false,\"GameFlowVisualUpdate\":false},\"QueueImages\":{\"OverrideQueueImage\":true},\"SuggestedPlayers\":{\"HonoredPlayersLimit\":4,\"FriendsOfFriendsLimit\":22,\"Enabled\":true,\"OnlineFriendsLimit\":4,\"PreviousPremadesLimit\":4,\"MaxNumSuggestedPlayers\":8,\"VictoriousComradesLimit\":4,\"FriendsOfFriendsEnabled\":true,\"MaxNumReplacements\":22},\"DisabledChampions\":{\"FIRSTBLOOD\":\"[]\",\"KINGPORO\":\"[161]\",\"ARAM_UNRANKED_5x5\":\"[]\",\"ONEFORALL_5x5\":\" []\",\"ASCENSION\":\"[83]\",\"SR_6x6\":\"[]\",\"URF\":\"[]\",\"KING_PORO\":\"[161]\",\"ODIN_UNRANKED\":\"[]\",\"NIGHTMARE_BOT\":\"[]\",\"RANKED_SOLO_5x5\":\"[]\",\"TUTORIAL\":\"[]\",\"URF_BOT\":\"[]\",\"FIRSTBLOOD_2x2\":\"[]\",\"FIRSTBLOOD_1x1\":\"[]\",\"CLASSIC\":\"[]\",\"RANKED_TEAM_5x5\":\"[]\",\"COUNTER_PICK\":\"[]\",\"RANKED_TEAM_3x3\":\"[]\",\"HEXAKILL\":\"[]\",\"BOT\":\"[]\",\"ODIN\":\"[]\",\"ONEFORALL\":\"[]\",\"NORMAL\":\"[]\",\"NORMAL_3x3\":\"[]\",\"BOT_3x3\":\"[]\",\"ARAM\":\"[]\"},\"Mutators\":{\"CustomGameMutators\":\"[]\",\"EnabledMutators\":\"[]\",\"EnabledModes\":\"[\\\"CLASSIC\\\",\\\"TUTORIAL\\\",\\\"ODIN\\\",\\\"ARAM\\\"]\"},\"EndOfGameGifting\":{\"Enabled\":true},\"ProfileHoverCard\":{\"IsEnabledForBuddyPanelView\":\"true\",\"ACSLookup\":\"true\",\"IsEnabledForSummonerQuickView\":\"true\",\"IsEnabledForGameLobbySuggestedPlayers\":\"false\",\"IsEnabledForGroupFinderCapViewSuggestedPlayers\":\"false\",\"IsEnabledForChatFriendsList\":\"true\",\"IsEnabledForChatGroupChatParticipants\":\"true\",\"IsEnabledForCustomGameLobby\":\"true\",\"IsEnabled\":\"true\",\"LeagueLookup\":\"true\"},\"SkinRentals\":{\"Enabled\":\"PROCESSONLY\"},\"ContextualEducation\":{\"TargetMinionsPerWave\":0.4,\"Enabled\":false,\"MaxTargetSummonerLevel\":10.0},\"DisabledChampionSkins\":{\"DisabledChampionSkins\":\"[]\"},\"ChampionMasteryConfig\":{\"Enabled\":false,\"MinSummonerLevel\":5,\"SupportedQueueTypes\":\"RANKED_SOLO_5x5,RANKED_SOLO_3x3,RANKED_TEAM_5x5,RANKED_TEAM_3x3,NORMAL_3x3,NORMAL,CAP_5x5,ARAM_UNRANKED_5x5\",\"MaxChampionLevel\":5,\"CapUnlockChampionLevel\":4,\"GradeEnabled\":true},\"EndOfGameGiftSettings\":{\"SenderGiftDailyMax\":5,\"GiftRecipientLevelMin\":5,\"GiftSenderRPMax\":50000,\"RecipientGiftDailyMax\":5,\"GiftSenderLevelMin\":15},\"Chat\":{\"Rename_general_group_throttle\":1.0,\"Default_public_chat_rooms\":\"\"},\"GameInvites\":{\"ServiceEnabled\":true,\"InviteBulkMaxSize\":200,\"LobbyCreationEnabled\":true},\"ContextualEducationURLs\":{\"LAST_HIT\":\"null\"},\"NewPlayerRouter\":{\"QueueID\":\"31\",\"ABDisablingOfTutorial\":true},\"SeasonReward\":{\"Maximum_team_reward_level\":3,\"Enabled\":true,\"ServiceCallEnabled\":true,\"QualificationWarningEnabled\":true,\"Minimum_points_per_reward_level\":\"20,45,75\",\"Minimum_win_team_reward_level_2\":35,\"Minimum_win_team_reward_level_1\":10,\"Minimum_win_team_reward_level_3\":75},\"String\":{\"String\":null},\"LeagueConfig\":{\"IsPreseason\":false,\"MasterTierEnabled\":true,\"PreseasonName\":\"2015\",\"SeasonName\":\"2015\"},\"ChampionTradeService\":{\"Enabled\":true},\"ChampionSelect\":{\"UseOptimizedChampSelectProcessor\":false,\"UseOptimizedSpellSelectProcessor\":false,\"AllChampsAvailableInAram\":false,\"UseOptimizedBotChampionSelectProcessor\":false,\"AutoReconnectEnabled\":true,\"CollatorChampionFilterEnabled\":false,\"AlwaysShowRewardIcon\":false},\"FeaturedGame\":{\"MetadataEnabled\":\"OFF\"},\"PlatfromShutdown\":{\"Enabled\":false}}"
+                    Config = "{\"Chroma\":{\"IsEnabled\":true},\"PlatformShutdown\":{\"Enabled\":false},\"BotConfigurations\":{\"IntermediateInCustoms\":true},\"ShareMatchHistory\":{\"MatchHistoryUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#login?redirect=%23player-search%2FcurrentAccount%2FOC1%2F{0}\",\"AdvancedGameDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"AdvancedGameDetailsEnabled\":true,\"MatchDetailsUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}\",\"ShareEndOfGameEnabled\":true,\"ShareGameUrlTemplate\":\"http://matchhistory.oce.leagueoflegends.com/{2}/#match-details/OC1/{0}/{1}/eog\",\"MatchHistoryEnabled\":true},\"GuestSlots\":{\"Enabled\":null},\"ServiceStatusAPI\":{\"Enabled\":true},\"FriendRecommendations\":{\"FaqLink\":\"http://oce.leagueoflegends.com/en/page/faq-add-friends\",\"StatusExpiryMillis\":300000,\"EnableAddFriendButton\":true,\"EnabledPercent\":100,\"ShowToolTip\":true,\"RegistrationPollRateMillis\":5000,\"HideFriends\":false,\"PlayerLevelForNewNotification\":0,\"RegistrationPollDurationMillis\":300000,\"ContactsUrlTemplate\":\"https://recofriender.leagueoflegends.com/v1/contacts/{0}/{1}\",\"ContactDetailsUrlTemplate\":\"https://recofriender.leagueoflegends.com/v1/contactdetails/{0}/{1}/{2}/\",\"AssociationUrlTemplate\":\"https://recofriender.leagueoflegends.com/v1/facebook-oauth?locale={0}\",\"EnableViewAllPanel\":true,\"UnlinkUrlTemplate\":\"https://recofriender.leagueoflegends.com/v1/facebook-oauth/unlink/{0}/{1}\",\"UseNativeFacebookPop\":false},\"GameTimerSync\":{\"Enabled\":false,\"PercentOfTotalTimerToSyncAt\":0.8},\"DockedPrompt\":{\"EnabledNewDockedPromptRenderer\":true},\"QueueRestriction\":{\"ServiceEnabled\":true,\"RankedDuoQueueRestrictionMode\":\"TIER\",\"KarmaEnabled\":false,\"RankedDuoQueueRestrictionMaxDelta\":1,\"RankedDuoQueueDefaultUnseededTier\":\"SILVER\"},\"PartyRewards\":{\"Enabled\":false,\"GameFlowVisualUpdate\":false},\"QueueImages\":{\"OverrideQueueImage\":true},\"SuggestedPlayers\":{\"HonoredPlayersLimit\":4,\"FriendsOfFriendsLimit\":22,\"Enabled\":true,\"OnlineFriendsLimit\":4,\"PreviousPremadesLimit\":4,\"MaxNumSuggestedPlayers\":8,\"VictoriousComradesLimit\":4,\"FriendsOfFriendsEnabled\":true,\"MaxNumReplacements\":22},\"DisabledChampions\":{\"FIRSTBLOOD\":\"[]\",\"KINGPORO\":\"[161]\",\"ARAM_UNRANKED_5x5\":\"[]\",\"ONEFORALL_5x5\":\" []\",\"ASCENSION\":\"[83]\",\"SR_6x6\":\"[]\",\"BILGEWATER\":\"[]\",\"URF\":\"[]\",\"KING_PORO\":\"[161]\",\"ODIN_UNRANKED\":\"[]\",\"NIGHTMARE_BOT\":\"[]\",\"RANKED_SOLO_5x5\":\"[]\",\"TUTORIAL\":\"[]\",\"URF_BOT\":\"[]\",\"FIRSTBLOOD_2x2\":\"[]\",\"FIRSTBLOOD_1x1\":\"[]\",\"CLASSIC\":\"[]\",\"RANKED_TEAM_5x5\":\"[]\",\"COUNTER_PICK\":\"[]\",\"RANKED_TEAM_3x3\":\"[]\",\"HEXAKILL\":\"[]\",\"BOT\":\"[]\",\"ODIN\":\"[]\",\"ONEFORALL\":\"[]\",\"NORMAL\":\"[]\",\"NORMAL_3x3\":\"[]\",\"BOT_3x3\":\"[]\",\"ARAM\":\"[]\"},\"Mutators\":{\"CustomGameMutators\":\"[]\",\"BattleTrainingMutators\":\"[]\",\"EnabledMutators\":\"[\\\"Bilgewater\\\"]\",\"BasicTutorialMutators\":\"[\\\"BasicTutorial\\\"]\",\"EnabledModes\":\"[\\\"CLASSIC\\\",\\\"TUTORIAL\\\",\\\"ODIN\\\",\\\"ARAM\\\"]\"},\"EndOfGameGifting\":{\"Enabled\":true},\"ProfileHoverCard\":{\"IsEnabledForBuddyPanelView\":\"true\",\"ACSLookup\":\"true\",\"IsEnabledForSummonerQuickView\":\"true\",\"IsEnabledForGameLobbySuggestedPlayers\":\"true\",\"IsEnabledForGroupFinderCapViewSuggestedPlayers\":null,\"IsEnabledForChatFriendsList\":\"true\",\"IsEnabledForChatGroupChatParticipants\":\"true\",\"IsEnabledForCustomGameLobby\":\"true\",\"IsEnabled\":\"true\",\"ChampionMasteryLookup\":\"true\",\"IsEnabledForTeamBuilderSuggestedPlayers\":\"true\",\"LeagueLookup\":\"true\"},\"SkinRentals\":{\"Enabled\":\"ON\"},\"ContextualEducation\":{\"TargetMinionsPerWave\":0.4,\"Enabled\":false,\"MaxTargetSummonerLevel\":10.0},\"DisabledChampionSkins\":{\"DisabledChampionSkins\":\"[]\"},\"ChampionMasteryConfig\":{\"Enabled\":true,\"MinSummonerLevel\":5,\"EndOfGameEnabled\":true,\"SupportedQueueTypes\":\"RANKED_SOLO_5x5,RANKED_TEAM_5x5,CAP_5x5,NORMAL,BILGEWATER-5x5\",\"MaxChampionLevel\":5,\"ShowGradeAvailablePopup\":true,\"CapUnlockChampionLevel\":4,\"GradeEnabled\":true},\"EndOfGameGiftSettings\":{\"SenderGiftDailyMax\":5,\"GiftRecipientLevelMin\":5,\"GiftSenderRPMax\":50000,\"RecipientGiftDailyMax\":5,\"GiftSenderLevelMin\":15},\"GameInvites\":{\"ServiceEnabled\":true,\"InviteBulkMaxSize\":200,\"LobbyCreationEnabled\":true},\"Chat\":{\"Rename_general_group_throttle\":1.0,\"Default_public_chat_rooms\":\"\",\"MaximumRosterSize\":325},\"ContextualEducationURLs\":{\"LAST_HIT\":\"null\"},\"NewMatchHistory\":{\"Enabled\":true,\"PostIPXPToLegSEnabled\":true,\"SharingEnabled\":true},\"NewPlayerRouter\":{\"QueueID\":\"31\",\"ABDisablingOfTutorial\":true},\"SeasonReward\":{\"Maximum_team_reward_level\":3,\"Enabled\":true,\"ServiceCallEnabled\":true,\"QualificationWarningEnabled\":true,\"Minimum_points_per_reward_level\":\"20,45,75\",\"Minimum_win_team_reward_level_2\":35,\"Minimum_win_team_reward_level_1\":10,\"Minimum_win_team_reward_level_3\":75},\"String\":{\"String\":null},\"LeagueConfig\":{\"IsPreseason\":false,\"MasterTierEnabled\":true,\"PreseasonName\":\"2015\",\"SeasonName\":\"2015\"},\"ChampionTradeService\":{\"Enabled\":true},\"ChampionSelect\":{\"UseOptimizedChampSelectProcessor\":false,\"UseOptimizedSpellSelectProcessor\":false,\"AllChampsAvailableInAram\":false,\"UseOptimizedBotChampionSelectProcessor\":false,\"AutoReconnectEnabled\":true,\"CollatorChampionFilterEnabled\":false,\"AlwaysShowRewardIcon\":false},\"FeaturedGame\":{\"MetadataEnabled\":\"OFF\"},\"PlatfromShutdown\":{\"Enabled\":false}}"
                 };
 
-                client.InvokeDestReceive("cn-1", "cn-1", "messagingDestination", clientConfig);
+                client.InvokeDestReceive("cn-200006292", "cn-200006292", "messagingDestination", clientConfig);
             }
         }
 

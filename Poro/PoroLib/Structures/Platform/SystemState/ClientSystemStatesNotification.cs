@@ -60,6 +60,7 @@ namespace PoroLib.Structures
         public bool sendFeedbackEventsEnabled { get; set; }
         public object knownGeographicGameServerRegions { get; set; }
         public bool leaguesDecayMessagingEnabled { get; set; }
+        public object tournamentShortCodesEnabled { get; set; }
         public double currentSeason { get; set; }
 
         public void ReadExternal(IDataInput input)

@@ -17,7 +17,7 @@ namespace PoroLib.Messages.LoginService
                 Password = creds.Password,
                 Summary = new AccountSummary
                 {
-                    AccountId = int.MaxValue - 2,
+                    AccountId = 200269701,
                     Username = creds.Username,
                     HasBetaAccess = true,
                     IsAdministrator = false,

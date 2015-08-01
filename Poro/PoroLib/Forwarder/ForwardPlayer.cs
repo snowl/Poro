@@ -17,10 +17,9 @@ namespace PoroLib.Forwarder
 {
     public class ForwardPlayer
     {
-        private User _user;
-        private BaseShard _shard;
-
         protected RtmpClient _client;
+        internal User _user;
+        internal BaseShard _shard;
         internal double _accountId;
         internal double _summonerId;
         internal string _summonerName;

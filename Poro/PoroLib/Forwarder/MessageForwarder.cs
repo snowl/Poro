@@ -8,7 +8,7 @@ namespace PoroLib.Forwarder
 {
     public class MessageForwarder
     {
-        private ForwardPlayer _client;
+        internal ForwardPlayer _client;
         private SerializationContext _context;
         
         /// <summary>
@@ -48,7 +48,7 @@ namespace PoroLib.Forwarder
             object[] data = e.OriginalMessage.Body as object[];
 
             //If the client tries to send data, switch the acct id and sum id to what is currently logged in
-            for (int i = 0; i < data.Length; i++)
+            /*for (int i = 0; i < data.Length; i++)
             {
                 if (data[i] is double)
                 {
@@ -64,7 +64,7 @@ namespace PoroLib.Forwarder
                         data[i] = _client._accountId;
                     }
                 }
-            }
+            }*/
 
             object result;
 
